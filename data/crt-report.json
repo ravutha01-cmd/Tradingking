@@ -1,0 +1,553 @@
+{
+  "generatedAt": "2026-10-01T04:09:15.148Z",
+  "symbol": "PAXGUSDT",
+  "interval": "4h",
+  "candles": 13348,
+  "from": 1598616000000,
+  "to": 1790812800000,
+  "splitTime": 1733155200000,
+  "combinations": 7776,
+  "robustCount": 118,
+  "cost": 0.4,
+  "untrained": {
+    "trades": 847,
+    "wins": 278,
+    "winRate": 0.3282172373081464,
+    "totalR": -113.37227641797404,
+    "expectancy": -0.13385156601885956,
+    "profitFactor": 0.8048079138015144,
+    "maxDD": 115.13744404703779
+  },
+  "best": {
+    "params": {
+      "minRangeAtr": 0.75,
+      "maxSweep": 0.5,
+      "closeDepth": 0,
+      "trend": "ema200",
+      "target": "mid",
+      "slBufferAtr": 0.5,
+      "minRR": 0.75,
+      "maxBars": 12,
+      "skipWeekend": false
+    },
+    "train": {
+      "trades": 41,
+      "wins": 30,
+      "winRate": 0.7317073170731707,
+      "totalR": 15.285161878717496,
+      "expectancy": 0.3728088263101828,
+      "profitFactor": 2.3385762675968826,
+      "maxDD": 2.106710748525466
+    },
+    "test": {
+      "trades": 26,
+      "wins": 12,
+      "winRate": 0.46153846153846156,
+      "totalR": -1.5875593673576986,
+      "expectancy": -0.061059975667603794,
+      "profitFactor": 0.8631217361420533,
+      "maxDD": 4.584556989638443
+    },
+    "all": {
+      "trades": 67,
+      "wins": 42,
+      "winRate": 0.6268656716417911,
+      "totalR": 13.69760251135979,
+      "expectancy": 0.20444182852775805,
+      "profitFactor": 1.5951003057431357,
+      "maxDD": 4.584556989638443
+    }
+  },
+  "top": [
+    {
+      "params": {
+        "minRangeAtr": 0.75,
+        "maxSweep": 0.5,
+        "closeDepth": 0,
+        "trend": "ema200",
+        "target": "mid",
+        "slBufferAtr": 0.5,
+        "minRR": 0.75,
+        "maxBars": 12,
+        "skipWeekend": false
+      },
+      "folds": [
+        {
+          "trades": 13,
+          "expectancy": 0.4210196289870115
+        },
+        {
+          "trades": 9,
+          "expectancy": 0.3263872451618429
+        },
+        {
+          "trades": 6,
+          "expectancy": 0.21346413805861597
+        },
+        {
+          "trades": 13,
+          "expectancy": 0.4302797436213893
+        }
+      ],
+      "train": {
+        "trades": 41,
+        "wins": 30,
+        "winRate": 0.7317073170731707,
+        "totalR": 15.285161878717496,
+        "expectancy": 0.3728088263101828,
+        "profitFactor": 2.3385762675968826,
+        "maxDD": 2.106710748525466
+      },
+      "test": {
+        "trades": 26,
+        "wins": 12,
+        "winRate": 0.46153846153846156,
+        "totalR": -1.5875593673576986,
+        "expectancy": -0.061059975667603794,
+        "profitFactor": 0.8631217361420533,
+        "maxDD": 4.584556989638443
+      }
+    },
+    {
+      "params": {
+        "minRangeAtr": 0.75,
+        "maxSweep": 1,
+        "closeDepth": 0,
+        "trend": "ema200",
+        "target": "mid",
+        "slBufferAtr": 0.5,
+        "minRR": 0.75,
+        "maxBars": 12,
+        "skipWeekend": false
+      },
+      "folds": [
+        {
+          "trades": 13,
+          "expectancy": 0.4210196289870115
+        },
+        {
+          "trades": 9,
+          "expectancy": 0.3263872451618429
+        },
+        {
+          "trades": 6,
+          "expectancy": 0.21346413805861597
+        },
+        {
+          "trades": 13,
+          "expectancy": 0.4302797436213893
+        }
+      ],
+      "train": {
+        "trades": 41,
+        "wins": 30,
+        "winRate": 0.7317073170731707,
+        "totalR": 15.285161878717496,
+        "expectancy": 0.3728088263101828,
+        "profitFactor": 2.3385762675968826,
+        "maxDD": 2.106710748525466
+      },
+      "test": {
+        "trades": 26,
+        "wins": 12,
+        "winRate": 0.46153846153846156,
+        "totalR": -1.5875593673576986,
+        "expectancy": -0.061059975667603794,
+        "profitFactor": 0.8631217361420533,
+        "maxDD": 4.584556989638443
+      }
+    },
+    {
+      "params": {
+        "minRangeAtr": 1,
+        "maxSweep": 0.5,
+        "closeDepth": 0,
+        "trend": "ema200",
+        "target": "mid",
+        "slBufferAtr": 0.5,
+        "minRR": 0.75,
+        "maxBars": 12,
+        "skipWeekend": false
+      },
+      "folds": [
+        {
+          "trades": 13,
+          "expectancy": 0.4210196289870115
+        },
+        {
+          "trades": 9,
+          "expectancy": 0.3263872451618429
+        },
+        {
+          "trades": 6,
+          "expectancy": 0.21346413805861597
+        },
+        {
+          "trades": 13,
+          "expectancy": 0.4302797436213893
+        }
+      ],
+      "train": {
+        "trades": 41,
+        "wins": 30,
+        "winRate": 0.7317073170731707,
+        "totalR": 15.285161878717496,
+        "expectancy": 0.3728088263101828,
+        "profitFactor": 2.3385762675968826,
+        "maxDD": 2.106710748525466
+      },
+      "test": {
+        "trades": 26,
+        "wins": 12,
+        "winRate": 0.46153846153846156,
+        "totalR": -1.5875593673576986,
+        "expectancy": -0.061059975667603794,
+        "profitFactor": 0.8631217361420533,
+        "maxDD": 4.584556989638443
+      }
+    },
+    {
+      "params": {
+        "minRangeAtr": 1,
+        "maxSweep": 1,
+        "closeDepth": 0,
+        "trend": "ema200",
+        "target": "mid",
+        "slBufferAtr": 0.5,
+        "minRR": 0.75,
+        "maxBars": 12,
+        "skipWeekend": false
+      },
+      "folds": [
+        {
+          "trades": 13,
+          "expectancy": 0.4210196289870115
+        },
+        {
+          "trades": 9,
+          "expectancy": 0.3263872451618429
+        },
+        {
+          "trades": 6,
+          "expectancy": 0.21346413805861597
+        },
+        {
+          "trades": 13,
+          "expectancy": 0.4302797436213893
+        }
+      ],
+      "train": {
+        "trades": 41,
+        "wins": 30,
+        "winRate": 0.7317073170731707,
+        "totalR": 15.285161878717496,
+        "expectancy": 0.3728088263101828,
+        "profitFactor": 2.3385762675968826,
+        "maxDD": 2.106710748525466
+      },
+      "test": {
+        "trades": 26,
+        "wins": 12,
+        "winRate": 0.46153846153846156,
+        "totalR": -1.5875593673576986,
+        "expectancy": -0.061059975667603794,
+        "profitFactor": 0.8631217361420533,
+        "maxDD": 4.584556989638443
+      }
+    },
+    {
+      "params": {
+        "minRangeAtr": 0.75,
+        "maxSweep": 0.25,
+        "closeDepth": 0,
+        "trend": "ema50",
+        "target": "opposite",
+        "slBufferAtr": 0.5,
+        "minRR": 1.5,
+        "maxBars": 3,
+        "skipWeekend": false
+      },
+      "folds": [
+        {
+          "trades": 9,
+          "expectancy": 0.27901741736573676
+        },
+        {
+          "trades": 11,
+          "expectancy": 0.27591509923238705
+        },
+        {
+          "trades": 6,
+          "expectancy": 0.14812399702089998
+        },
+        {
+          "trades": 19,
+          "expectancy": 0.2907535282008536
+        }
+      ],
+      "train": {
+        "trades": 45,
+        "wins": 24,
+        "winRate": 0.5333333333333333,
+        "totalR": 11.95928386578951,
+        "expectancy": 0.26576186368421134,
+        "profitFactor": 1.8858747807564107,
+        "maxDD": 3.4724975369245357
+      },
+      "test": {
+        "trades": 33,
+        "wins": 13,
+        "winRate": 0.3939393939393939,
+        "totalR": -4.229576080253639,
+        "expectancy": -0.12816897212889816,
+        "profitFactor": 0.746005033272534,
+        "maxDD": 9.35072870767036
+      }
+    },
+    {
+      "params": {
+        "minRangeAtr": 1,
+        "maxSweep": 0.25,
+        "closeDepth": 0,
+        "trend": "ema50",
+        "target": "opposite",
+        "slBufferAtr": 0.5,
+        "minRR": 1.5,
+        "maxBars": 3,
+        "skipWeekend": false
+      },
+      "folds": [
+        {
+          "trades": 9,
+          "expectancy": 0.27901741736573676
+        },
+        {
+          "trades": 11,
+          "expectancy": 0.27591509923238705
+        },
+        {
+          "trades": 6,
+          "expectancy": 0.14812399702089998
+        },
+        {
+          "trades": 19,
+          "expectancy": 0.2907535282008536
+        }
+      ],
+      "train": {
+        "trades": 45,
+        "wins": 24,
+        "winRate": 0.5333333333333333,
+        "totalR": 11.95928386578951,
+        "expectancy": 0.26576186368421134,
+        "profitFactor": 1.8858747807564107,
+        "maxDD": 3.4724975369245357
+      },
+      "test": {
+        "trades": 32,
+        "wins": 12,
+        "winRate": 0.375,
+        "totalR": -5.918392895369658,
+        "expectancy": -0.18494977798030182,
+        "profitFactor": 0.6445880206393305,
+        "maxDD": 9.35072870767036
+      }
+    },
+    {
+      "params": {
+        "minRangeAtr": 0.75,
+        "maxSweep": 0.5,
+        "closeDepth": 0,
+        "trend": "ema50",
+        "target": "opposite",
+        "slBufferAtr": 0.5,
+        "minRR": 1.5,
+        "maxBars": 6,
+        "skipWeekend": false
+      },
+      "folds": [
+        {
+          "trades": 9,
+          "expectancy": 0.325487561552271
+        },
+        {
+          "trades": 11,
+          "expectancy": 0.207359197383401
+        },
+        {
+          "trades": 7,
+          "expectancy": 0.18698786410941556
+        },
+        {
+          "trades": 20,
+          "expectancy": 0.4605104871026119
+        }
+      ],
+      "train": {
+        "trades": 47,
+        "wins": 26,
+        "winRate": 0.5531914893617021,
+        "totalR": 15.729464016005993,
+        "expectancy": 0.33466944714906366,
+        "profitFactor": 1.7923729072667782,
+        "maxDD": 4.416530318558318
+      },
+      "test": {
+        "trades": 34,
+        "wins": 14,
+        "winRate": 0.4117647058823529,
+        "totalR": -4.6953044702921,
+        "expectancy": -0.1380971903027088,
+        "profitFactor": 0.7593865063163755,
+        "maxDD": 9.059392961038352
+      }
+    },
+    {
+      "params": {
+        "minRangeAtr": 0.75,
+        "maxSweep": 1,
+        "closeDepth": 0,
+        "trend": "ema50",
+        "target": "opposite",
+        "slBufferAtr": 0.5,
+        "minRR": 1.5,
+        "maxBars": 6,
+        "skipWeekend": false
+      },
+      "folds": [
+        {
+          "trades": 9,
+          "expectancy": 0.325487561552271
+        },
+        {
+          "trades": 11,
+          "expectancy": 0.207359197383401
+        },
+        {
+          "trades": 7,
+          "expectancy": 0.18698786410941556
+        },
+        {
+          "trades": 20,
+          "expectancy": 0.4605104871026119
+        }
+      ],
+      "train": {
+        "trades": 47,
+        "wins": 26,
+        "winRate": 0.5531914893617021,
+        "totalR": 15.729464016005993,
+        "expectancy": 0.33466944714906366,
+        "profitFactor": 1.7923729072667782,
+        "maxDD": 4.416530318558318
+      },
+      "test": {
+        "trades": 34,
+        "wins": 14,
+        "winRate": 0.4117647058823529,
+        "totalR": -4.6953044702921,
+        "expectancy": -0.1380971903027088,
+        "profitFactor": 0.7593865063163755,
+        "maxDD": 9.059392961038352
+      }
+    },
+    {
+      "params": {
+        "minRangeAtr": 1,
+        "maxSweep": 0.5,
+        "closeDepth": 0,
+        "trend": "ema50",
+        "target": "opposite",
+        "slBufferAtr": 0.5,
+        "minRR": 1.5,
+        "maxBars": 6,
+        "skipWeekend": false
+      },
+      "folds": [
+        {
+          "trades": 9,
+          "expectancy": 0.325487561552271
+        },
+        {
+          "trades": 11,
+          "expectancy": 0.207359197383401
+        },
+        {
+          "trades": 7,
+          "expectancy": 0.18698786410941556
+        },
+        {
+          "trades": 20,
+          "expectancy": 0.4605104871026119
+        }
+      ],
+      "train": {
+        "trades": 47,
+        "wins": 26,
+        "winRate": 0.5531914893617021,
+        "totalR": 15.729464016005993,
+        "expectancy": 0.33466944714906366,
+        "profitFactor": 1.7923729072667782,
+        "maxDD": 4.416530318558318
+      },
+      "test": {
+        "trades": 33,
+        "wins": 13,
+        "winRate": 0.3939393939393939,
+        "totalR": -6.384121285408119,
+        "expectancy": -0.19345822076994298,
+        "profitFactor": 0.6728421476602399,
+        "maxDD": 9.059392961038352
+      }
+    },
+    {
+      "params": {
+        "minRangeAtr": 1,
+        "maxSweep": 1,
+        "closeDepth": 0,
+        "trend": "ema50",
+        "target": "opposite",
+        "slBufferAtr": 0.5,
+        "minRR": 1.5,
+        "maxBars": 6,
+        "skipWeekend": false
+      },
+      "folds": [
+        {
+          "trades": 9,
+          "expectancy": 0.325487561552271
+        },
+        {
+          "trades": 11,
+          "expectancy": 0.207359197383401
+        },
+        {
+          "trades": 7,
+          "expectancy": 0.18698786410941556
+        },
+        {
+          "trades": 20,
+          "expectancy": 0.4605104871026119
+        }
+      ],
+      "train": {
+        "trades": 47,
+        "wins": 26,
+        "winRate": 0.5531914893617021,
+        "totalR": 15.729464016005993,
+        "expectancy": 0.33466944714906366,
+        "profitFactor": 1.7923729072667782,
+        "maxDD": 4.416530318558318
+      },
+      "test": {
+        "trades": 33,
+        "wins": 13,
+        "winRate": 0.3939393939393939,
+        "totalR": -6.384121285408119,
+        "expectancy": -0.19345822076994298,
+        "profitFactor": 0.6728421476602399,
+        "maxDD": 9.059392961038352
+      }
+    }
+  ]
+}

@@ -10,6 +10,7 @@
 <body>
   <header class="topbar">
     <div class="brand">👑 TradingKing <span>XAUUSD Signals</span></div>
+    <nav class="nav"><a href="index.html" class="active">Dashboard</a><a href="crt.html">CRT 4H Lab</a></nav>
     <div class="ticker">
       <span class="price" id="price">—</span>
       <span class="change" id="change">—</span>
@@ -59,6 +60,13 @@
       <div class="tv" id="tvChart"></div>
     </section>
 
+    <section class="card crt-mini" id="crtCard">
+      <h2>CRT 4H <a href="crt.html" class="link">open lab →</a></h2>
+      <div class="action" id="crtMiniAction">—</div>
+      <p class="confidence" id="crtMiniNote">Loading…</p>
+      <table class="plan" id="crtMiniPlan"></table>
+    </section>
+
     <section class="card">
       <h2>Multi-timeframe</h2>
       <table class="mtf" id="mtf"><tr><td>Loading…</td></tr></table>
@@ -87,6 +95,8 @@
 
   <script src="js/indicators.js"></script>
   <script src="js/signals.js"></script>
+  <script src="js/crt.js"></script>
+  <script src="js/crt-trained.js"></script>
   <script src="js/data.js"></script>
   <script src="js/app.js"></script>
 </body>

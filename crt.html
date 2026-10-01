@@ -1,0 +1,99 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TradingKing · CRT 4H Lab</title>
+  <meta name="description" content="Candle Range Theory (CRT) 4H strategy for XAUUSD: live setups, recorded history, backtest and training." />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">👑 TradingKing <span>CRT 4H Lab</span></div>
+    <nav class="nav"><a href="index.html">Dashboard</a><a href="crt.html" class="active">CRT 4H Lab</a></nav>
+    <div class="ticker">
+      <span class="price" id="price">—</span>
+      <span class="status" id="status"><i></i><b>loading</b></span>
+    </div>
+  </header>
+
+  <main class="lab">
+    <section class="card span2">
+      <h2>Live CRT 4H setup <small id="paramsLabel"></small></h2>
+      <div class="live-grid">
+        <div>
+          <div class="action" id="crtAction">—</div>
+          <p class="confidence" id="crtNote">Loading 4H history…</p>
+          <table class="plan" id="crtPlan"></table>
+        </div>
+        <div>
+          <h3>Watching the last closed 4H candle (C1)</h3>
+          <table class="plan" id="crtWatch"></table>
+          <p class="hint">A <b>bullish CRT</b> forms if the next candle trades below C1 low and closes back inside the range.
+          A <b>bearish CRT</b> forms if it trades above C1 high and closes back inside.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card">
+      <h2>Recorded data</h2>
+      <table class="plan" id="dataInfo"></table>
+      <div class="buttons">
+        <button id="btnSync">Update now</button>
+        <button id="btnCsv">Download CSV</button>
+        <button id="btnClearData" class="ghost">Delete recorded data</button>
+      </div>
+      <p class="hint">4H candles of gold (PAXG/USDT, Binance) since Aug 2020. Recorded in this browser and topped up automatically every minute while the page is open.</p>
+    </section>
+
+    <section class="card span3">
+      <h2>Train the strategy</h2>
+      <div class="controls inline">
+        <label>Training share
+          <select id="split"><option value="0.6">60% train / 40% test</option><option value="0.7" selected>70% train / 30% test</option><option value="0.8">80% train / 20% test</option></select>
+        </label>
+        <label>Cost per trade ($)
+          <input id="cost" type="number" min="0" max="5" step="0.1" value="0.4" />
+        </label>
+        <label>Min. trades
+          <input id="minTrades" type="number" min="10" max="500" step="10" value="40" />
+        </label>
+        <button id="btnTrain" class="primary">Train</button>
+        <div class="progress" id="progress" hidden><div></div></div>
+      </div>
+      <p class="hint">Tries every combination of the CRT rules (range size, sweep depth, close depth, trend filter, target, stop buffer, minimum reward:risk, holding time).
+        Settings are chosen <b>only on the older data</b>, scored on how consistently they profit across 4 slices of it. They are then tested on the newer data they never saw. Only the test result tells you how the strategy might do going forward.</p>
+      <div id="verdict"></div>
+      <div id="trainResults"></div>
+    </section>
+
+    <section class="card span3">
+      <h2>Backtest · active settings <button class="link" id="btnReset">reset to built-in</button></h2>
+      <div class="tiles" id="tiles"></div>
+      <div class="chart" id="equity"></div>
+      <details>
+        <summary>Active settings &amp; last 30 trades</summary>
+        <table class="plan" id="activeParams"></table>
+        <div class="history-wrap"><table class="history" id="trades"></table></div>
+      </details>
+    </section>
+
+    <section class="card span3">
+      <h2>Signal journal <button class="link" id="btnClearJournal">clear</button></h2>
+      <div class="tiles" id="journalTiles"></div>
+      <div class="history-wrap"><table class="history" id="journal"></table></div>
+      <p class="hint">Every live CRT setup found with the active settings after you first opened this page is recorded here and tracked until it hits the target, the stop, or the time limit.</p>
+    </section>
+  </main>
+
+  <footer>
+    Backtests use historical data and simple fill assumptions (stop counted first if stop and target are inside the same candle). Past results do not guarantee future results. Educational use only — not financial advice.
+  </footer>
+
+  <script src="js/indicators.js"></script>
+  <script src="js/crt.js"></script>
+  <script src="js/crt-trained.js"></script>
+  <script src="js/history.js"></script>
+  <script src="js/crt-lab.js"></script>
+</body>
+</html>

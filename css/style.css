@@ -108,3 +108,74 @@ footer { padding: 16px; color: var(--muted); font-size: 12px; text-align: center
 }
 [hidden] { display: none !important; }
 td:only-child { text-align: left; }
+
+/* ---------- Navigation ---------- */
+.nav { display: flex; gap: 4px; }
+.nav a { color: var(--muted); text-decoration: none; padding: 6px 12px; border-radius: 6px; font-weight: 600; }
+.nav a:hover { color: var(--text); }
+.nav a.active { background: var(--bg); color: var(--gold); }
+
+/* ---------- Buttons ---------- */
+button:not(.link) {
+  background: var(--bg); color: var(--text); border: 1px solid var(--border); border-radius: 6px;
+  padding: 8px 14px; font: inherit; cursor: pointer;
+}
+button:not(.link):hover:not(:disabled) { border-color: var(--gold); }
+button:disabled { opacity: .6; cursor: default; }
+button.primary { background: var(--gold); color: #1a1405; border-color: var(--gold); font-weight: 700; }
+button.ghost { color: var(--muted); }
+.buttons { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+
+/* ---------- CRT lab ---------- */
+.lab { display: grid; gap: 16px; padding: 16px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.span2 { grid-column: span 2; }
+.span3 { grid-column: 1 / -1; }
+.live-grid, .two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 24px; }
+.card h3 { margin: 16px 0 8px; font-size: 13px; color: var(--text); }
+.live-grid h3 { margin-top: 0; }
+.hint { color: var(--muted); font-size: 12.5px; margin: 10px 0 0; }
+.controls.inline { padding: 0; border: 0; }
+.progress { flex: 1 1 160px; height: 8px; background: var(--bg); border-radius: 4px; overflow: hidden; align-self: center; }
+.progress div { height: 100%; width: 0; background: var(--gold); transition: width .2s; }
+.verdict { margin: 14px 0 0; padding: 12px 14px; border-radius: 8px; border: 1px solid var(--border); border-left-width: 4px; }
+.verdict small { color: var(--muted); }
+.verdict.good { border-left-color: var(--buy); }
+.verdict.warn { border-left-color: var(--gold); }
+.verdict.bad { border-left-color: var(--sell); }
+td.up, b.up { color: var(--buy); }
+td.down, b.down { color: var(--sell); }
+.mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; text-align: left !important; }
+.table-scroll { overflow-x: auto; }
+.table-scroll table { min-width: 560px; }
+.tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; margin-bottom: 12px; }
+.tile { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+.tile span { display: block; color: var(--muted); font-size: 12px; }
+.tile b { font-size: 20px; font-variant-numeric: tabular-nums; }
+details { margin-top: 12px; }
+summary { cursor: pointer; color: var(--gold); }
+
+/* Equity chart */
+.chart { position: relative; }
+.chart svg { display: block; touch-action: none; }
+.chart text { fill: var(--muted); font-size: 11px; }
+.chart .grid { stroke: var(--border); stroke-width: 1; }
+.chart .zero { stroke: var(--muted); stroke-width: 1; }
+.chart .line { fill: none; stroke: var(--gold); stroke-width: 2; stroke-linejoin: round; }
+.chart .split { stroke: var(--muted); stroke-dasharray: 4 4; }
+.chart .split-label { fill: var(--text); }
+.chart .cross { stroke: var(--muted); stroke-width: 1; }
+.chart .dot { fill: var(--gold); stroke: var(--card); stroke-width: 2; }
+.chart .tip {
+  position: absolute; pointer-events: none; background: var(--bg); border: 1px solid var(--border);
+  border-radius: 6px; padding: 6px 9px; font-size: 12px; white-space: nowrap;
+}
+
+/* CRT card on dashboard */
+.crt-mini .action { font-size: 22px; }
+
+@media (max-width: 900px) {
+  .lab { grid-template-columns: minmax(0, 1fr); }
+  .span2, .span3 { grid-column: auto; }
+  .live-grid, .two { grid-template-columns: minmax(0, 1fr); }
+  .topbar .nav { order: 3; width: 100%; }
+}

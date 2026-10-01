@@ -182,17 +182,38 @@
   async function updateMtf() {
     if (state.feed.id !== 'binance') {
       $('mtf').innerHTML = '<tr><td>Multi-timeframe scan uses the Binance feed (saves Twelve Data API credits).</td></tr>';
+      $('crtMiniNote').textContent = 'CRT uses the Binance 4H feed — open the lab.';
       return;
     }
     const rows = await Promise.all(MTF_FRAMES.map(async (tf) => {
       try {
-        const sig = Signals.analyze(await state.feed.fetchCandles(tf, 500), { slAtr: +$('slAtr').value || 1.5 });
+        const candles = await state.feed.fetchCandles(tf, 500);
+        if (tf === '4h') renderCrt(candles);
+        const sig = Signals.analyze(candles, { slAtr: +$('slAtr').value || 1.5 });
         return { tf, sig };
       } catch { return { tf, sig: null }; }
     }));
     $('mtf').innerHTML = '<tr><th>TF</th><th>Signal</th><th>RSI</th><th>Score</th></tr>' + rows.map(({ tf, sig }) => sig && sig.ready
       ? `<tr><td>${tf.toUpperCase()}</td><td><span class="tag ${cls(sig.action)}">${sig.action}</span></td><td>${fmt(sig.indicators.rsi, 1)}</td><td>${sig.score > 0 ? '+' : ''}${sig.score}</td></tr>`
       : `<tr><td>${tf.toUpperCase()}</td><td>—</td><td></td><td></td></tr>`).join('');
+  }
+
+  // ---------- CRT 4H (settings come from the CRT Lab or the built-in training) ----------
+  function crtParams() {
+    try { const s = JSON.parse(localStorage.getItem('tradingking.crt')); if (s && s.params) return s.params; } catch { /* ignore */ }
+    return (window.CRT_TRAINED && window.CRT_TRAINED.params) || CRT.DEFAULT_PARAMS;
+  }
+
+  function renderCrt(candles) {
+    const { setup: s, watch: w } = CRT.current(candles, crtParams());
+    const live = s && s.result.outcome === 'open';
+    const el = $('crtMiniAction');
+    el.textContent = live ? (s.dir === 1 ? 'BULLISH CRT · BUY' : 'BEARISH CRT · SELL') : 'NO ACTIVE SETUP';
+    el.style.color = live ? (s.dir === 1 ? 'var(--buy)' : 'var(--sell)') : 'var(--neutral)';
+    $('crtMiniNote').textContent = live ? `Entry ${fmt(s.entry)} · R:R ${s.rr.toFixed(2)}` : `Watching C1 range ${fmt(w.low)} – ${fmt(w.high)}`;
+    $('crtMiniPlan').innerHTML = live
+      ? `<tr class="sl"><td>Stop loss</td><td>${fmt(s.sl)}</td></tr><tr class="tp"><td>Target</td><td>${fmt(s.tp)}</td></tr>`
+      : '';
   }
 
   // ---------- Startup ----------
