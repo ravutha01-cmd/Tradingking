@@ -29,6 +29,8 @@
         <div>
           <h3>Watching the last closed 4H candle (C1)</h3>
           <table class="plan" id="crtWatch"></table>
+          <h3>Session &amp; higher timeframe</h3>
+          <table class="plan" id="crtHtf"></table>
           <p class="hint">A <b>bullish CRT</b> forms if the next candle trades below C1 low and closes back inside the range.
           A <b>bearish CRT</b> forms if it trades above C1 high and closes back inside.</p>
         </div>
@@ -43,7 +45,8 @@
         <button id="btnCsv">Download CSV</button>
         <button id="btnClearData" class="ghost">Delete recorded data</button>
       </div>
-      <p class="hint">4H candles of gold (PAXG/USDT, Binance) since Aug 2020. Recorded in this browser and topped up automatically every minute while the page is open.</p>
+      <p class="hint">1H candles of gold (PAXG/USDT, Binance) since Aug 2020, recorded in this browser and topped up every minute while the page is open.
+        They are combined into New York-aligned 4H candles (opening 5 PM, 9 PM, 1 AM, 5 AM, 9 AM, 1 PM NY, weekends removed), matching a forex XAUUSD chart. The first download takes about half a minute.</p>
     </section>
 
     <section class="card span3">
@@ -61,7 +64,9 @@
         <button id="btnTrain" class="primary">Train</button>
         <div class="progress" id="progress" hidden><div></div></div>
       </div>
-      <p class="hint">Tries every combination of the CRT rules (range size, sweep depth, close depth, trend filter, target, stop buffer, minimum reward:risk, holding time).
+      <p class="hint">Tries every combination of the CRT rules (range size, sweep depth, trend filter, target, stop buffer, minimum reward:risk, holding time) together with the
+        <b>session</b> of the sweep candle (all, key 1/5/9 AM NY, London, New York, Asia), the <b>higher-timeframe bias</b> (previous day, daily EMA20, previous week) and <b>premium/discount</b>.
+        It also trains once without those filters so you can see whether they help.
         Settings are chosen <b>only on the older data</b>, scored on how consistently they profit across 4 slices of it. They are then tested on the newer data they never saw. Only the test result tells you how the strategy might do going forward.</p>
       <div id="verdict"></div>
       <div id="trainResults"></div>
@@ -91,6 +96,7 @@
   </footer>
 
   <script src="js/indicators.js"></script>
+  <script src="js/sessions.js"></script>
   <script src="js/crt.js"></script>
   <script src="js/crt-trained.js"></script>
   <script src="js/history.js"></script>

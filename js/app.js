@@ -182,13 +182,11 @@
   async function updateMtf() {
     if (state.feed.id !== 'binance') {
       $('mtf').innerHTML = '<tr><td>Multi-timeframe scan uses the Binance feed (saves Twelve Data API credits).</td></tr>';
-      $('crtMiniNote').textContent = 'CRT uses the Binance 4H feed — open the lab.';
       return;
     }
     const rows = await Promise.all(MTF_FRAMES.map(async (tf) => {
       try {
         const candles = await state.feed.fetchCandles(tf, 500);
-        if (tf === '4h') renderCrt(candles);
         const sig = Signals.analyze(candles, { slAtr: +$('slAtr').value || 1.5 });
         return { tf, sig };
       } catch { return { tf, sig: null }; }
@@ -200,17 +198,31 @@
 
   // ---------- CRT 4H (settings come from the CRT Lab or the built-in training) ----------
   function crtParams() {
-    try { const s = JSON.parse(localStorage.getItem('tradingking.crt')); if (s && s.params) return s.params; } catch { /* ignore */ }
+    try { const s = JSON.parse(localStorage.getItem('tradingking.crt')); if (s && s.version === 2 && s.params) return s.params; } catch { /* ignore */ }
     return (window.CRT_TRAINED && window.CRT_TRAINED.params) || CRT.DEFAULT_PARAMS;
   }
 
+  // CRT runs on New York-aligned 4H candles built from the last ~4 months of 1H data.
+  async function updateCrt() {
+    try {
+      const hourly = await History.fetchRange('1h', Date.now() - 3000 * 3600e3);
+      renderCrt(Sessions.build4h(hourly));
+    } catch (e) {
+      $('crtMiniNote').textContent = `CRT data unavailable: ${e.message}`;
+    }
+  }
+
   function renderCrt(candles) {
-    const { setup: s, watch: w } = CRT.current(candles, crtParams());
+    const p = crtParams();
+    const { setup: s, watch: w, nyHour } = CRT.current(candles, p);
     const live = s && s.result.outcome === 'open';
     const el = $('crtMiniAction');
     el.textContent = live ? (s.dir === 1 ? 'BULLISH CRT · BUY' : 'BEARISH CRT · SELL') : 'NO ACTIVE SETUP';
     el.style.color = live ? (s.dir === 1 ? 'var(--buy)' : 'var(--sell)') : 'var(--neutral)';
-    $('crtMiniNote').textContent = live ? `Entry ${fmt(s.entry)} · R:R ${s.rr.toFixed(2)}` : `Watching C1 range ${fmt(w.low)} – ${fmt(w.high)}`;
+    const sess = Sessions.SESSIONS[p.session || 'all'];
+    $('crtMiniNote').textContent = live
+      ? `Entry ${fmt(s.entry)} · R:R ${s.rr.toFixed(2)} · ${Sessions.sessionName(s.nyHour)}`
+      : `Watching C1 range ${fmt(w.low)} – ${fmt(w.high)} · now ${Sessions.fmtHour(nyHour)}${sess.hours ? ` · filter: ${sess.label}` : ''}`;
     $('crtMiniPlan').innerHTML = live
       ? `<tr class="sl"><td>Stop loss</td><td>${fmt(s.sl)}</td></tr><tr class="tp"><td>Target</td><td>${fmt(s.tp)}</td></tr>`
       : '';
@@ -272,6 +284,8 @@
     renderHistory();
     loadTradingView();
     start();
+    updateCrt();
+    setInterval(updateCrt, 5 * 60000);
   }
 
   init();

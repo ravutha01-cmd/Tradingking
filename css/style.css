@@ -179,3 +179,6 @@ summary { cursor: pointer; color: var(--gold); }
   .live-grid, .two { grid-template-columns: minmax(0, 1fr); }
   .topbar .nav { order: 3; width: 100%; }
 }
+small.used { color: var(--gold); font-size: 11px; margin-left: 4px; }
+tr.sel td { background: rgba(245, 197, 66, .08); }
+.card h3 small { color: var(--muted); font-weight: 400; }

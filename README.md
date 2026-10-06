@@ -27,30 +27,50 @@ On the 4H chart, candle 1 (C1) sets a range. Candle 2 (C2) **sweeps** one side o
 - **Bearish CRT:** C2 trades above C1 high and closes back below it → SELL at C2 close, stop above the C2 wick, target the middle or low of C1.
 - **Bullish CRT:** C2 trades below C1 low and closes back above it → BUY at C2 close, stop below the C2 wick, target the middle or high of C1.
 
+**Candles are New York-aligned**, like OANDA:XAUUSD on TradingView: 4H candles open at 5 PM, 9 PM, 1 AM, 5 AM, 9 AM and 1 PM New York time (daylight saving handled), the trading day runs 5 PM → 5 PM NY, and the weekend (Fri 5 PM → Sun 5 PM NY) is removed. Binance's own 4H candles start at 00:00 UTC, so the lab records **1H** candles and builds the NY 4H candles from them.
+
+**Optional filters:**
+
+- **Session** — only take a CRT when C2 (the sweep candle) is one of: the key CRT candles (1 AM, 5 AM, 9 AM NY), London (1 AM, 5 AM), New York (9 AM, 1 PM) or Asia (5 PM, 9 PM).
+- **Higher-timeframe bias** — only trade in the direction of the previous daily candle, the daily close vs daily EMA20, or the previous weekly candle.
+- **Premium / discount** — buy only below the previous day's midpoint, sell only above it.
+
+Only completed daily/weekly candles are used (no look-ahead).
+
 The **CRT 4H Lab** page:
 
-1. **Records data:** downloads every 4H gold candle since Aug 2020 (~13,000), saves them in your browser, and adds new ones every minute. You can download them as a CSV.
-2. **Live setup:** shows the current CRT signal and the C1 range the forming candle is sweeping.
-3. **Trains:** tests 7,776 rule combinations (range size, sweep depth, close depth, EMA trend filter, target, stop buffer, minimum reward:risk, holding time, weekend filter), including a trading cost per trade. Settings are picked **only on the older data** (default 70%), scored on how consistently they profit across 4 slices of it, then **tested on the newest data they never saw**. The verdict box says whether they passed.
+1. **Records data:** downloads every 1H gold candle since Aug 2020 (~53,000, about 25 s the first time), saves them in your browser (~2 MB), and adds new ones every minute. You can download the NY 4H candles as a CSV.
+2. **Live setup:** shows the current CRT signal, the C1 range the forming candle is sweeping, the current NY session, the daily/weekly bias, the premium/discount zone and which direction the active settings allow right now.
+3. **Trains:** tests 17,280 rule combinations (range size, sweep depth, EMA trend filter, target, stop buffer, minimum reward:risk, holding time, session, higher-timeframe bias, premium/discount), including a trading cost per trade. It also trains once without the session/bias filters and shows a one-at-a-time filter breakdown, so you can see whether they help. Settings are picked **only on the older data** (default 70%), scored on how consistently they profit across 4 slices of it, then **tested on the newest data they never saw**. The verdict box says whether they passed.
 4. **Backtest:** stats and equity curve for the active settings, with the train/test split marked.
 5. **Signal journal:** records every live CRT signal from the day you start and tracks whether it hit the target, the stop, or the time limit.
 
 The dashboard also has a small CRT 4H card using the same settings.
 
-### Training results so far (Oct 2026, PAXG/USDT 4H, $0.40 cost per trade)
+### Training results so far (6 Oct 2026, NY-aligned 4H, $0.40 cost per trade, test period Dec 2024 → Oct 2026)
 
-| | Trades | Win rate | Avg per trade |
-|---|---|---|---|
-| Plain CRT (default settings, all data) | 847 | 33% | −0.13R |
-| Trained settings, training period | 41 | 73% | +0.37R |
-| Trained settings, **unseen test period** | 26 | 46% | **−0.06R** |
+| | Train avg / trades | **Test avg / trades** |
+|---|---|---|
+| Plain CRT (default settings, all data) | −0.12R / 662 (all data) | |
+| Trained **without** session / bias filters | +0.02R / 563 | **−0.12R / 261** |
+| Trained **with** session / bias filters | +0.16R / 60 (92% win) | **−0.16R / 27** |
 
-**The training has not found a CRT version that is reliably profitable.** Training improves the old data a lot, but the improvement mostly disappears on new data, which is the signature of overfitting. The two findings that held across the top settings: only trading **with the trend** (EMA50/EMA200 filter) and using a **wider stop** (0.5× ATR beyond the wick) did better. Use the journal to forward-test before trusting any signal.
+Filter breakdown on the test period (best settings, one option swapped at a time):
+
+| Session of C2 | Test avg / trades | | HTF bias | Test avg / trades |
+|---|---|---|---|---|
+| All | −0.08R / 104 | | Off | −0.21R / 50 |
+| Key 1/5/9 AM NY | −0.07R / 60 | | Previous day | −0.16R / 27 |
+| London | −0.17R / 42 | | Daily EMA20 | −0.21R / 45 |
+| New York | +0.08R / 38 | | Previous week | −0.19R / 32 |
+| Asia | −0.16R / 27 | | | |
+
+**Session times and higher-timeframe bias did not make CRT profitable on unseen data.** They improved the training numbers (fewer, cleaner trades) but every one of the top 10 settings lost on the test period, which is the signature of overfitting. The key 1/5/9 AM candles performed about the same as trading every session. The New York session was the only positive test result, but it lost in training, so choosing it now would be picking with hindsight — watch it in the journal instead. Use the journal to forward-test before trusting any signal.
 
 Retrain from the command line (also refreshes the built-in settings used by the site):
 
 ```bash
-npm run train      # writes data/paxg-4h.csv, data/crt-report.json, js/crt-trained.js
+npm run train      # writes data/xauusd-4h-ny.csv, data/crt-report.json, js/crt-trained.js
 ```
 
 ## Data feeds
@@ -80,7 +100,7 @@ You can also open `index.html` directly, or host it on GitHub Pages, Netlify or 
 npm test
 ```
 
-Unit tests cover the indicators, the signal engine, and the CRT detector, trade simulation, journal and optimizer.
+Unit tests cover the indicators, the signal engine, NY session times / candle building, and the CRT detector, filters, trade simulation, journal and optimizer.
 
 ## Project layout
 
@@ -93,11 +113,12 @@ js/signals.js       scoring + trade plan
 js/data.js          Binance WebSocket feed / Twelve Data polling feed
 js/app.js           dashboard UI, TradingView widgets, history, alerts
 js/crt.js           CRT detection, backtest, optimizer, journal
-js/history.js       4H candle recorder (Binance, saved in the browser)
+js/sessions.js      New York time, sessions, NY-aligned 4H candles
+js/history.js       1H candle recorder (Binance, saved in the browser)
 js/crt-lab.js       CRT Lab UI
 js/crt-trained.js   built-in trained CRT settings (generated)
 scripts/train-crt.js  command-line training
-data/               recorded 4H history (CSV) and training report
+data/               recorded NY 4H history (CSV) and training report
 tests/              node:test unit tests
 ```
 

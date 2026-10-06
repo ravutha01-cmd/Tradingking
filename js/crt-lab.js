@@ -10,6 +10,9 @@
   const KEY = 'tradingking.crt';
   const st = (() => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; } })();
   const save = () => { try { localStorage.setItem(KEY, JSON.stringify(st)); } catch { /* storage unavailable */ } };
+  // v2 moved to New York-aligned 4H candles with session/bias filters: settings and
+  // journal entries from v1 refer to the old UTC candles, so start them fresh.
+  if (st.version !== 2) { delete st.params; delete st.splitTime; st.journal = []; st.recordingSince = Date.now(); st.version = 2; }
   st.journal = st.journal || [];
   st.recordingSince = st.recordingSince || Date.now();
   save();
@@ -17,8 +20,10 @@
   const BUILT_IN = window.CRT_TRAINED || null;
   const active = () => st.params || (BUILT_IN && BUILT_IN.params) || CRT.DEFAULT_PARAMS;
   const cost = () => +$('cost').value || 0;
-  let candles = [];
+  let hourly = [];   // recorded 1H candles
+  let candles = [];  // NY-aligned 4H candles built from them
   let lastTrain = null;
+  const setHourly = (h) => { hourly = h; candles = Sessions.build4h(h); };
 
   // ---------- Live ----------
   function setStatus(s) { $('status').className = 'status ' + s; $('status').querySelector('b').textContent = s; }
@@ -61,12 +66,37 @@
       ${f ? `<tr><td>Forming candle</td><td>H ${fmt(f.high)} · L ${fmt(f.low)} · C ${fmt(f.close)}</td></tr>
       <tr><td>Sweep so far</td><td>${sweptHigh ? '<span class="tag sell">high swept</span> ' : ''}${sweptLow ? '<span class="tag buy">low swept</span>' : ''}${!sweptHigh && !sweptLow ? 'none yet' : ''}</td></tr>
       <tr><td>Candle closes</td><td>${date(f.time + 4 * 3600e3)}</td></tr>` : ''}`;
+    renderHtf(cur, p, f);
+  }
+
+  // Session and higher-timeframe picture for the forming candle (the would-be C2).
+  function renderHtf(cur, p, f) {
+    const h = cur.htf, hour = cur.nyHour;
+    const dirTag = (d) => (d > 0 ? '<span class="tag buy">bullish</span>' : d < 0 ? '<span class="tag sell">bearish</span>' : '<span class="tag neutral">n/a</span>');
+    const used = (on) => (on ? ' <small class="used">used</small>' : '');
+    const sess = Sessions.SESSIONS[p.session || 'all'];
+    const inSession = !sess.hours || sess.hours.includes(hour);
+    const price = f ? f.close : candles[candles.length - 1].close;
+    const zone = h.prevDayMid == null ? 0 : price < h.prevDayMid ? 1 : -1;
+    const bias = p.bias && p.bias !== 'none' ? CRT.biasDir(h, p.bias) : null;
+    const longOk = (bias == null || bias === 1) && (p.zone !== 'pd' || zone > 0);
+    const shortOk = (bias == null || bias === -1) && (p.zone !== 'pd' || zone < 0);
+    $('crtHtf').innerHTML = `
+      <tr><td>Current 4H candle</td><td>${Sessions.fmtHour(hour)} · ${Sessions.sessionName(hour)}</td></tr>
+      <tr><td>Session filter${used(sess.hours)}</td><td>${sess.label} ${sess.hours ? (inSession ? '✓ in session' : '✗ outside') : ''}</td></tr>
+      <tr><td>Previous day${used(p.bias === 'prevDay')}</td><td>${dirTag(h.prevDayDir)}</td></tr>
+      <tr><td>Daily vs EMA20 (${fmt(h.dailyEma)})${used(p.bias === 'dailyEma')}</td><td>${dirTag(h.dailyEmaDir)}</td></tr>
+      <tr><td>Previous week${used(p.bias === 'prevWeek')}</td><td>${dirTag(h.prevWeekDir)}</td></tr>
+      <tr><td>Previous day range</td><td>${fmt(h.prevDayLow)} – ${fmt(h.prevDayHigh)}</td></tr>
+      <tr><td>Price zone (vs mid ${fmt(h.prevDayMid)})${used(p.zone === 'pd')}</td><td>${zone > 0 ? '<span class="tag buy">discount</span>' : zone < 0 ? '<span class="tag sell">premium</span>' : '—'}</td></tr>
+      <tr><td>Allowed direction now</td><td>${!inSession ? 'none (outside session)' : [longOk && 'LONG', shortOk && 'SHORT'].filter(Boolean).join(' / ') || 'none'}</td></tr>`;
   }
 
   function renderData() {
     const closed = candles.filter((c) => c.closed);
     $('dataInfo').innerHTML = closed.length ? `
-      <tr><td>Candles recorded</td><td>${closed.length.toLocaleString()}</td></tr>
+      <tr><td>1H candles recorded</td><td>${hourly.length.toLocaleString()}</td></tr>
+      <tr><td>NY 4H candles built</td><td>${closed.length.toLocaleString()}</td></tr>
       <tr><td>From</td><td>${day(closed[0].time)}</td></tr>
       <tr><td>To</td><td>${date(closed[closed.length - 1].time)}</td></tr>
       <tr><td>Last update</td><td>${new Date().toLocaleTimeString()}</td></tr>` : '<tr><td>No data yet</td></tr>';
@@ -122,10 +152,12 @@
     closeDepth: ['C2 closes inside by ≥', (v) => `${v * 100}% of range`], trend: ['Trend filter', (v) => (v === 'none' ? 'off' : `with ${v.toUpperCase()}`)],
     target: ['Target', (v) => (v === 'mid' ? '50% of C1' : 'opposite side of C1')], slBufferAtr: ['Stop buffer', (v) => `${v}× ATR beyond C2 wick`],
     minRR: ['Min reward : risk', (v) => v], maxBars: ['Max holding time', (v) => `${v} candles (${v * 4}h)`],
-    skipWeekend: ['Skip weekend candles', (v) => (v ? 'yes' : 'no')],
+    session: ['Session (C2 candle)', (v) => Sessions.SESSIONS[v || 'all'].label],
+    bias: ['Higher-timeframe bias', (v) => CRT.BIASES[v || 'none']],
+    zone: ['Premium / discount', (v) => (v === 'pd' ? 'buy below / sell above prev. day mid' : 'off')],
   };
   const paramRows = (p) => Object.entries(LABELS).map(([k, [l, f]]) => `<tr><td>${l}</td><td>${f(p[k])}</td></tr>`).join('');
-  const paramShort = (p) => `range≥${p.minRangeAtr}ATR · sweep≤${p.maxSweep} · close≥${p.closeDepth} · ${p.trend} · ${p.target} · SL+${p.slBufferAtr}ATR · RR≥${p.minRR} · ${p.maxBars} bars${p.skipWeekend ? ' · no wkend' : ''}`;
+  const paramShort = (p) => `range≥${p.minRangeAtr}ATR · sweep≤${p.maxSweep} · close≥${p.closeDepth} · ${p.trend} · ${p.target} · SL+${p.slBufferAtr}ATR · RR≥${p.minRR} · ${p.maxBars} bars · ${p.session || 'all'} · bias ${p.bias || 'none'}${p.zone === 'pd' ? ' · P/D' : ''}`;
 
   // Single-series equity curve (cumulative R) with hover crosshair + tooltip.
   function drawEquity(el, pts, splitTime) {
@@ -215,7 +247,19 @@
         ${res.top.map((r, i) => `<tr><td>${i + 1}</td><td class="mono">${paramShort(r.params)}</td>
           <td class="${r.train.expectancy >= 0 ? 'up' : 'down'}">${sR(r.train.expectancy)}</td><td>${r.train.trades}</td>
           <td class="${r.test.expectancy >= 0 ? 'up' : 'down'}">${sR(r.test.expectancy)}</td><td>${r.test.trades}</td></tr>`).join('')}
-      </table></div>`;
+      </table></div>
+      ${res.baseline ? `<h3>Do session times &amp; higher-timeframe bias help?</h3>
+      <div class="table-scroll"><table class="history">
+        <tr><th>Training run</th><th>Combinations</th><th>Train avg</th><th>Train trades</th><th>Test avg</th><th>Test trades</th></tr>
+        ${cmpRow('Without session / bias filters', res.baseline)}${cmpRow('With session / bias filters', { combinations: res.tested, train: b.train, test: b.test })}
+      </table></div>` : ''}
+      ${res.breakdown ? `<h3>Filter breakdown <small>(best settings, one option swapped at a time)</small></h3>
+      <div class="table-scroll"><table class="history">
+        <tr><th>Filter</th><th>Option</th><th>Train avg</th><th>Train trades</th><th>Test avg</th><th>Test trades</th></tr>
+        ${res.breakdown.map((r) => `<tr${r.value === b.params[r.group] ? ' class="sel"' : ''}><td>${r.group}</td><td>${optLabel(r.group, r.value)}</td>
+          <td class="${r.train.expectancy >= 0 ? 'up' : 'down'}">${r.train.trades ? sR(r.train.expectancy) : '—'}</td><td>${r.train.trades}</td>
+          <td class="${r.test.expectancy >= 0 ? 'up' : 'down'}">${r.test.trades ? sR(r.test.expectancy) : '—'}</td><td>${r.test.trades}</td></tr>`).join('')}
+      </table></div>` : ''}`;
     const use = $('btnUse');
     if (use) use.addEventListener('click', () => {
       st.params = b.params; st.splitTime = res.splitTime; save();
@@ -224,16 +268,24 @@
     });
   }
 
+  const cmpRow = (name, r) => `<tr><td>${name}</td><td>${r.combinations.toLocaleString()}</td>
+    <td class="${r.train.expectancy >= 0 ? 'up' : 'down'}">${sR(r.train.expectancy)}</td><td>${r.train.trades}</td>
+    <td class="${r.test.expectancy >= 0 ? 'up' : 'down'}">${sR(r.test.expectancy)}</td><td>${r.test.trades}</td></tr>`;
+  const optLabel = (group, v) => (group === 'session' ? Sessions.SESSIONS[v].label : group === 'bias' ? CRT.BIASES[v] : v === 'pd' ? 'Premium / discount' : 'Off');
+
   async function train() {
     const closed = candles.filter((c) => c.closed);
     if (closed.length < 1000) { $('verdict').innerHTML = '<div class="verdict warn">Record more data first.</div>'; return; }
     const btn = $('btnTrain'), bar = $('progress');
     btn.disabled = true; bar.hidden = false;
     const t0 = performance.now();
-    lastTrain = await CRT.optimize(closed, {
-      split: +$('split').value, cost: cost(), minTrades: +$('minTrades').value || 40,
-      onProgress: (f) => { bar.firstElementChild.style.width = `${f * 100}%`; btn.textContent = `Training… ${Math.round(f * 100)}%`; },
-    });
+    const opts = { split: +$('split').value, cost: cost(), minTrades: +$('minTrades').value || 40 };
+    const nBase = CRT.combos(CRT.BASELINE_GRID).length, nFull = CRT.combos(CRT.GRID).length;
+    const progress = (done) => { bar.firstElementChild.style.width = `${done * 100}%`; btn.textContent = `Training… ${Math.round(done * 100)}%`; };
+    const base = await CRT.optimize(closed, { ...opts, grid: CRT.BASELINE_GRID, onProgress: (f) => progress((f * nBase) / (nBase + nFull)) });
+    lastTrain = await CRT.optimize(closed, { ...opts, onProgress: (f) => progress((nBase + f * nFull) / (nBase + nFull)) });
+    if (base.best) lastTrain.baseline = { combinations: base.tested, params: base.best.params, train: base.best.train, test: base.best.test };
+    if (lastTrain.best) lastTrain.breakdown = CRT.breakdown(closed, lastTrain.best.params, opts);
     btn.disabled = false; bar.hidden = true;
     btn.textContent = `Train again (${((performance.now() - t0) / 1000).toFixed(0)}s)`;
     renderTrainResults(lastTrain);
@@ -244,8 +296,9 @@
     if (!BUILT_IN) return;
     renderTrainResults({
       fromBuiltIn: true, best: { params: BUILT_IN.params, train: BUILT_IN.train, test: BUILT_IN.test },
-      top: [{ params: BUILT_IN.params, train: BUILT_IN.train, test: BUILT_IN.test }],
+      top: BUILT_IN.top || [{ params: BUILT_IN.params, train: BUILT_IN.train, test: BUILT_IN.test }],
       tested: BUILT_IN.combinations, robustCount: BUILT_IN.robustCount, cost: BUILT_IN.cost, splitTime: BUILT_IN.splitTime,
+      baseline: BUILT_IN.baseline, breakdown: BUILT_IN.breakdown,
     });
     $('trainResults').insertAdjacentHTML('afterbegin', `<p class="hint">Showing the built-in training run (${day(BUILT_IN.generatedAt)}, ${BUILT_IN.candles.toLocaleString()} candles). Press <b>Train</b> to retrain on your recorded data.</p>`);
   }
@@ -254,12 +307,12 @@
   async function sync() {
     setStatus('loading');
     try {
-      const res = await History.sync('4h', (t) => { $('dataInfo').innerHTML = `<tr><td>Downloading… ${day(t)}</td></tr>`; });
-      candles = res.candles;
+      const res = await History.sync('1h', (t) => { $('dataInfo').innerHTML = `<tr><td>Downloading 1H history… ${day(t)}</td></tr>`; });
+      setHourly(res.candles);
       setStatus(res.saved ? 'live' : 'live (not saved)');
       refreshAll();
     } catch (e) {
-      candles = History.load('4h');
+      setHourly(History.load('1h'));
       setStatus('error');
       $('crtNote').textContent = `Could not reach the data feed: ${e.message}`;
       if (candles.length) refreshAll();
@@ -274,16 +327,16 @@
   $('btnCsv').addEventListener('click', () => {
     const a = document.createElement('a');
     a.href = URL.createObjectURL(new Blob([History.toCSV(candles)], { type: 'text/csv' }));
-    a.download = 'xauusd-paxg-4h.csv'; a.click();
+    a.download = 'xauusd-4h-ny.csv'; a.click();
   });
-  $('btnClearData').addEventListener('click', () => { if (confirm('Delete recorded candles from this browser?')) { History.clear('4h'); candles = []; sync(); } });
+  $('btnClearData').addEventListener('click', () => { if (confirm('Delete recorded candles from this browser?')) { History.clear('1h'); setHourly([]); sync(); } });
   $('btnClearJournal').addEventListener('click', () => { st.journal = []; st.recordingSince = Date.now(); save(); renderJournal(); });
   $('btnReset').addEventListener('click', () => { delete st.params; delete st.splitTime; save(); refreshAll(); });
   $('cost').addEventListener('change', () => { renderBacktest(); });
   let resizeTimer;
   window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(renderBacktest, 200); });
 
-  candles = History.load('4h');
+  setHourly(History.load('1h'));
   if (candles.length) refreshAll();
   showBuiltIn();
   sync();

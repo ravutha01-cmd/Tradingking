@@ -1,52 +1,69 @@
 #!/usr/bin/env node
-/* Downloads 4H gold history, trains the CRT strategy (grid search on the oldest 70%,
- * tested on the newest 30%), and writes:
- *   data/paxg-4h.csv        recorded candle history
+/* Downloads 1H gold history, builds New York-aligned 4H candles, trains the CRT
+ * strategy (grid search on the oldest 70%, tested on the newest 30%) with and without
+ * the session / higher-timeframe bias filters, and writes:
+ *   data/xauusd-4h-ny.csv   recorded NY-aligned 4H candles
  *   data/crt-report.json    full training report
  *   js/crt-trained.js       trained parameters used by the website by default
- * Usage: node scripts/train-crt.js   (behind a proxy: NODE_USE_ENV_PROXY=1 node ...) */
+ * Usage: npm run train   (behind a proxy: NODE_USE_ENV_PROXY=1 npm run train) */
 const fs = require('fs');
 const path = require('path');
 const History = require('../js/history.js');
+const Sessions = require('../js/sessions.js');
 const CRT = require('../js/crt.js');
 
 const root = path.join(__dirname, '..');
 const pct = (v) => (v * 100).toFixed(1) + '%';
 const line = (name, s) => console.log(
-  `${name.padEnd(6)} trades ${String(s.trades).padStart(4)}  win ${pct(s.winRate).padStart(6)}  ` +
-  `PF ${s.profitFactor.toFixed(2)}  exp ${s.expectancy.toFixed(3)}R  total ${s.totalR.toFixed(1)}R  maxDD ${s.maxDD.toFixed(1)}R`);
+  `${name.padEnd(22)} trades ${String(s.trades).padStart(4)}  win ${pct(s.winRate).padStart(6)}  ` +
+  `PF ${s.profitFactor.toFixed(2)}  avg ${s.expectancy.toFixed(3)}R  total ${s.totalR.toFixed(1)}R  maxDD ${s.maxDD.toFixed(1)}R`);
+const strip = (s) => (s ? { ...s, equity: undefined } : s);
 
 (async () => {
-  console.log('Downloading 4H history…');
-  const candles = await History.fetchRange('4h', 0);
-  const closed = candles.filter((c) => c.closed);
-  fs.writeFileSync(path.join(root, 'data/paxg-4h.csv'), History.toCSV(closed));
-  console.log(`Recorded ${closed.length} candles ${new Date(closed[0].time).toISOString()} → ${new Date(closed.at(-1).time).toISOString()}`);
+  console.log('Downloading 1H history…');
+  const hourly = await History.fetchRange('1h', 0);
+  const candles = Sessions.build4h(hourly).filter((c) => c.closed);
+  fs.writeFileSync(path.join(root, 'data/xauusd-4h-ny.csv'), History.toCSV(candles));
+  console.log(`Recorded ${hourly.length} 1H → ${candles.length} NY 4H candles ${new Date(candles[0].time).toISOString()} → ${new Date(candles.at(-1).time).toISOString()}`);
 
-  const base = CRT.backtest(closed, CRT.DEFAULT_PARAMS).stats;
-  line('Untrained', base);
+  const plain = CRT.backtest(candles, CRT.DEFAULT_PARAMS).stats;
+  line('Plain CRT (all data)', plain);
 
-  console.log(`Training on ${CRT.combos(CRT.GRID).length} parameter combinations…`);
-  const res = await CRT.optimize(closed, { split: 0.7, minTrades: 40 });
+  console.log(`\nTraining WITHOUT session/bias filters (${CRT.combos(CRT.BASELINE_GRID).length} combinations)…`);
+  const base = await CRT.optimize(candles, { grid: CRT.BASELINE_GRID });
+  line('  train', base.best.train); line('  test (unseen)', base.best.test);
+
+  console.log(`\nTraining WITH session/bias filters (${CRT.combos(CRT.GRID).length} combinations)…`);
+  const res = await CRT.optimize(candles);
   if (!res.best) throw new Error('No parameter set produced enough trades');
-  console.log(`${res.robustCount} combinations were profitable consistently across the training slices (cost $${res.cost}/trade).`);
+  console.log(`${res.robustCount} combinations were consistently profitable across the training slices.`);
   console.log('Best parameters:', res.best.params);
-  line('Train', res.best.train);
-  line('Test', res.best.test);
-  const full = CRT.backtest(closed, res.best.params).stats;
-  line('All', full);
+  line('  train', res.best.train); line('  test (unseen)', res.best.test);
 
-  const strip = (s) => ({ ...s, equity: undefined });
+  console.log('\nTop 10 — test results:');
+  for (const r of res.top) console.log(`  ${r.params.session.padEnd(8)} ${r.params.bias.padEnd(9)} ${r.params.zone.padEnd(4)} train ${r.train.expectancy.toFixed(2)}R/${r.train.trades}  test ${r.test.expectancy.toFixed(2)}R/${r.test.trades}`);
+
+  const bd = CRT.breakdown(candles, res.best.params);
+  console.log('\nFilter breakdown (best params, one option swapped at a time):');
+  for (const r of bd) console.log(`  ${r.group.padEnd(8)} ${r.value.padEnd(9)} train ${r.train.expectancy.toFixed(2)}R/${r.train.trades}  test ${r.test.expectancy.toFixed(2)}R/${r.test.trades}`);
+
   const report = {
-    generatedAt: new Date().toISOString(), symbol: History.SYMBOL, interval: '4h',
-    candles: closed.length, from: closed[0].time, to: closed.at(-1).time, splitTime: res.splitTime,
-    combinations: res.tested, robustCount: res.robustCount, cost: res.cost, untrained: strip(base),
-    best: { params: res.best.params, train: strip(res.best.train), test: strip(res.best.test), all: strip(full) },
+    generatedAt: new Date().toISOString(), symbol: History.SYMBOL, interval: '4h (New York-aligned)', version: 2,
+    candles: candles.length, from: candles[0].time, to: candles.at(-1).time, splitTime: res.splitTime,
+    combinations: res.tested, robustCount: res.robustCount, cost: res.cost, plain: strip(plain),
+    baseline: { combinations: base.tested, params: base.best.params, train: strip(base.best.train), test: strip(base.best.test) },
+    best: { params: res.best.params, train: strip(res.best.train), test: strip(res.best.test) },
     top: res.top.map((r) => ({ params: r.params, folds: r.folds, train: strip(r.train), test: strip(r.test) })),
+    breakdown: bd.map((r) => ({ group: r.group, value: r.value, train: strip(r.train), test: strip(r.test) })),
   };
   fs.writeFileSync(path.join(root, 'data/crt-report.json'), JSON.stringify(report, null, 2) + '\n');
   fs.writeFileSync(path.join(root, 'js/crt-trained.js'),
     '/* Generated by scripts/train-crt.js — trained CRT 4H parameters and their results. */\n' +
-    `window.CRT_TRAINED = ${JSON.stringify({ generatedAt: report.generatedAt, candles: report.candles, from: report.from, to: report.to, splitTime: report.splitTime, combinations: report.combinations, robustCount: report.robustCount, cost: report.cost, params: report.best.params, train: report.best.train, test: report.best.test }, null, 2)};\n`);
-  console.log('Wrote data/paxg-4h.csv, data/crt-report.json, js/crt-trained.js');
+    `window.CRT_TRAINED = ${JSON.stringify({
+      version: 2, generatedAt: report.generatedAt, candles: report.candles, from: report.from, to: report.to,
+      splitTime: report.splitTime, combinations: report.combinations, robustCount: report.robustCount, cost: report.cost,
+      params: report.best.params, train: report.best.train, test: report.best.test, baseline: report.baseline,
+      top: report.top.map(({ params, train, test }) => ({ params, train, test })), breakdown: report.breakdown,
+    }, null, 2)};\n`);
+  console.log('\nWrote data/xauusd-4h-ny.csv, data/crt-report.json, js/crt-trained.js');
 })().catch((e) => { console.error(e); process.exit(1); });

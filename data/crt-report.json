@@ -1,22 +1,57 @@
 {
-  "generatedAt": "2026-10-01T04:09:15.148Z",
+  "generatedAt": "2026-10-06T13:47:14.117Z",
   "symbol": "PAXGUSDT",
-  "interval": "4h",
-  "candles": 13348,
-  "from": 1598616000000,
-  "to": 1790812800000,
-  "splitTime": 1733155200000,
-  "combinations": 7776,
-  "robustCount": 118,
+  "interval": "4h (New York-aligned)",
+  "version": 2,
+  "candles": 9552,
+  "from": 1598605200000,
+  "to": 1791277200000,
+  "splitTime": 1733436000000,
+  "combinations": 17280,
+  "robustCount": 180,
   "cost": 0.4,
-  "untrained": {
-    "trades": 847,
-    "wins": 278,
-    "winRate": 0.3282172373081464,
-    "totalR": -113.37227641797404,
-    "expectancy": -0.13385156601885956,
-    "profitFactor": 0.8048079138015144,
-    "maxDD": 115.13744404703779
+  "plain": {
+    "trades": 662,
+    "wins": 228,
+    "winRate": 0.34441087613293053,
+    "totalR": -81.36540960059587,
+    "expectancy": -0.12290847371691219,
+    "profitFactor": 0.8174002780093762,
+    "maxDD": 82.5163958108872
+  },
+  "baseline": {
+    "combinations": 432,
+    "params": {
+      "minRangeAtr": 1,
+      "maxSweep": 1,
+      "closeDepth": 0,
+      "trend": "none",
+      "target": "mid",
+      "slBufferAtr": 0.5,
+      "minRR": 0,
+      "maxBars": 3,
+      "session": "all",
+      "bias": "none",
+      "zone": "any"
+    },
+    "train": {
+      "trades": 563,
+      "wins": 412,
+      "winRate": 0.7317939609236235,
+      "totalR": 8.726318908453981,
+      "expectancy": 0.015499678345388955,
+      "profitFactor": 1.0753063341351092,
+      "maxDD": 12.953192242893625
+    },
+    "test": {
+      "trades": 261,
+      "wins": 162,
+      "winRate": 0.6206896551724138,
+      "totalR": -31.73727468421751,
+      "expectancy": -0.12159875357937744,
+      "profitFactor": 0.6267995185582073,
+      "maxDD": 32.641839477201984
+    }
   },
   "best": {
     "params": {
@@ -26,36 +61,29 @@
       "trend": "ema200",
       "target": "mid",
       "slBufferAtr": 0.5,
-      "minRR": 0.75,
+      "minRR": 0,
       "maxBars": 12,
-      "skipWeekend": false
+      "session": "asia",
+      "bias": "prevDay",
+      "zone": "any"
     },
     "train": {
-      "trades": 41,
-      "wins": 30,
-      "winRate": 0.7317073170731707,
-      "totalR": 15.285161878717496,
-      "expectancy": 0.3728088263101828,
-      "profitFactor": 2.3385762675968826,
-      "maxDD": 2.106710748525466
+      "trades": 60,
+      "wins": 55,
+      "winRate": 0.9166666666666666,
+      "totalR": 9.729023267967108,
+      "expectancy": 0.1621503877994518,
+      "profitFactor": 2.8674333690073825,
+      "maxDD": 1.1030982622563203
     },
     "test": {
-      "trades": 26,
-      "wins": 12,
-      "winRate": 0.46153846153846156,
-      "totalR": -1.5875593673576986,
-      "expectancy": -0.061059975667603794,
-      "profitFactor": 0.8631217361420533,
-      "maxDD": 4.584556989638443
-    },
-    "all": {
-      "trades": 67,
-      "wins": 42,
-      "winRate": 0.6268656716417911,
-      "totalR": 13.69760251135979,
-      "expectancy": 0.20444182852775805,
-      "profitFactor": 1.5951003057431357,
-      "maxDD": 4.584556989638443
+      "trades": 27,
+      "wins": 18,
+      "winRate": 0.6666666666666666,
+      "totalR": -4.251496988169081,
+      "expectancy": -0.15746285141366967,
+      "profitFactor": 0.5340516557388385,
+      "maxDD": 4.251496988169081
     }
   },
   "top": [
@@ -67,94 +95,149 @@
         "trend": "ema200",
         "target": "mid",
         "slBufferAtr": 0.5,
-        "minRR": 0.75,
+        "minRR": 0,
         "maxBars": 12,
-        "skipWeekend": false
+        "session": "asia",
+        "bias": "prevDay",
+        "zone": "any"
       },
       "folds": [
         {
-          "trades": 13,
-          "expectancy": 0.4210196289870115
+          "trades": 14,
+          "expectancy": 0.19090485196794263
         },
         {
-          "trades": 9,
-          "expectancy": 0.3263872451618429
-        },
-        {
-          "trades": 6,
-          "expectancy": 0.21346413805861597
+          "trades": 19,
+          "expectancy": 0.1667897580457539
         },
         {
           "trades": 13,
-          "expectancy": 0.4302797436213893
+          "expectancy": 0.17051138178096925
+        },
+        {
+          "trades": 14,
+          "expectancy": 0.11933585531385613
         }
       ],
       "train": {
-        "trades": 41,
-        "wins": 30,
-        "winRate": 0.7317073170731707,
-        "totalR": 15.285161878717496,
-        "expectancy": 0.3728088263101828,
-        "profitFactor": 2.3385762675968826,
-        "maxDD": 2.106710748525466
+        "trades": 60,
+        "wins": 55,
+        "winRate": 0.9166666666666666,
+        "totalR": 9.729023267967108,
+        "expectancy": 0.1621503877994518,
+        "profitFactor": 2.8674333690073825,
+        "maxDD": 1.1030982622563203
       },
       "test": {
-        "trades": 26,
-        "wins": 12,
-        "winRate": 0.46153846153846156,
-        "totalR": -1.5875593673576986,
-        "expectancy": -0.061059975667603794,
-        "profitFactor": 0.8631217361420533,
-        "maxDD": 4.584556989638443
+        "trades": 27,
+        "wins": 18,
+        "winRate": 0.6666666666666666,
+        "totalR": -4.251496988169081,
+        "expectancy": -0.15746285141366967,
+        "profitFactor": 0.5340516557388385,
+        "maxDD": 4.251496988169081
       }
     },
     {
       "params": {
         "minRangeAtr": 0.75,
-        "maxSweep": 1,
+        "maxSweep": 0.5,
         "closeDepth": 0,
-        "trend": "ema200",
+        "trend": "none",
         "target": "mid",
         "slBufferAtr": 0.5,
-        "minRR": 0.75,
-        "maxBars": 12,
-        "skipWeekend": false
+        "minRR": 0,
+        "maxBars": 6,
+        "session": "asia",
+        "bias": "prevDay",
+        "zone": "any"
       },
       "folds": [
         {
-          "trades": 13,
-          "expectancy": 0.4210196289870115
+          "trades": 35,
+          "expectancy": 0.1048721847369057
         },
         {
-          "trades": 9,
-          "expectancy": 0.3263872451618429
+          "trades": 28,
+          "expectancy": 0.10447347606849496
         },
         {
-          "trades": 6,
-          "expectancy": 0.21346413805861597
+          "trades": 22,
+          "expectancy": 0.1790071261773486
         },
         {
-          "trades": 13,
-          "expectancy": 0.4302797436213893
+          "trades": 33,
+          "expectancy": 0.11486896944732641
         }
       ],
       "train": {
-        "trades": 41,
-        "wins": 30,
-        "winRate": 0.7317073170731707,
-        "totalR": 15.285161878717496,
-        "expectancy": 0.3728088263101828,
-        "profitFactor": 2.3385762675968826,
-        "maxDD": 2.106710748525466
+        "trades": 118,
+        "wins": 103,
+        "winRate": 0.8728813559322034,
+        "totalR": 14.324616563372999,
+        "expectancy": 0.12139505562180507,
+        "profitFactor": 1.9986689564530526,
+        "maxDD": 2.4491065459346473
       },
       "test": {
-        "trades": 26,
-        "wins": 12,
-        "winRate": 0.46153846153846156,
-        "totalR": -1.5875593673576986,
-        "expectancy": -0.061059975667603794,
-        "profitFactor": 0.8631217361420533,
-        "maxDD": 4.584556989638443
+        "trades": 52,
+        "wins": 36,
+        "winRate": 0.6923076923076923,
+        "totalR": -5.226018199878494,
+        "expectancy": -0.10050034999766334,
+        "profitFactor": 0.6606015089167478,
+        "maxDD": 5.700720875689548
+      }
+    },
+    {
+      "params": {
+        "minRangeAtr": 0.75,
+        "maxSweep": 0.5,
+        "closeDepth": 0,
+        "trend": "none",
+        "target": "mid",
+        "slBufferAtr": 0.5,
+        "minRR": 0,
+        "maxBars": 3,
+        "session": "asia",
+        "bias": "prevDay",
+        "zone": "any"
+      },
+      "folds": [
+        {
+          "trades": 35,
+          "expectancy": 0.08253996503677898
+        },
+        {
+          "trades": 28,
+          "expectancy": 0.10964035600259282
+        },
+        {
+          "trades": 22,
+          "expectancy": 0.21093253965107123
+        },
+        {
+          "trades": 33,
+          "expectancy": 0.14287415878443493
+        }
+      ],
+      "train": {
+        "trades": 118,
+        "wins": 103,
+        "winRate": 0.8728813559322034,
+        "totalR": 15.314191856569785,
+        "expectancy": 0.12978128692008292,
+        "profitFactor": 2.2255543316949464,
+        "maxDD": 2.1336607686727596
+      },
+      "test": {
+        "trades": 53,
+        "wins": 35,
+        "winRate": 0.660377358490566,
+        "totalR": -5.152361777546679,
+        "expectancy": -0.09721437316125808,
+        "profitFactor": 0.668788964619587,
+        "maxDD": 5.203938854047971
       }
     },
     {
@@ -162,48 +245,50 @@
         "minRangeAtr": 1,
         "maxSweep": 0.5,
         "closeDepth": 0,
-        "trend": "ema200",
+        "trend": "none",
         "target": "mid",
         "slBufferAtr": 0.5,
-        "minRR": 0.75,
-        "maxBars": 12,
-        "skipWeekend": false
+        "minRR": 0,
+        "maxBars": 3,
+        "session": "all",
+        "bias": "prevDay",
+        "zone": "pd"
       },
       "folds": [
         {
-          "trades": 13,
-          "expectancy": 0.4210196289870115
+          "trades": 37,
+          "expectancy": 0.14677674502275237
         },
         {
-          "trades": 9,
-          "expectancy": 0.3263872451618429
+          "trades": 28,
+          "expectancy": 0.13643068890280666
         },
         {
-          "trades": 6,
-          "expectancy": 0.21346413805861597
+          "trades": 20,
+          "expectancy": 0.09241996684519048
         },
         {
-          "trades": 13,
-          "expectancy": 0.4302797436213893
+          "trades": 26,
+          "expectancy": 0.08804651239655316
         }
       ],
       "train": {
-        "trades": 41,
-        "wins": 30,
-        "winRate": 0.7317073170731707,
-        "totalR": 15.285161878717496,
-        "expectancy": 0.3728088263101828,
-        "profitFactor": 2.3385762675968826,
-        "maxDD": 2.106710748525466
+        "trades": 111,
+        "wins": 84,
+        "winRate": 0.7567567567567568,
+        "totalR": 13.388407514334611,
+        "expectancy": 0.12061628391292442,
+        "profitFactor": 1.8441689501009462,
+        "maxDD": 2.0216860010872733
       },
       "test": {
-        "trades": 26,
-        "wins": 12,
-        "winRate": 0.46153846153846156,
-        "totalR": -1.5875593673576986,
-        "expectancy": -0.061059975667603794,
-        "profitFactor": 0.8631217361420533,
-        "maxDD": 4.584556989638443
+        "trades": 52,
+        "wins": 31,
+        "winRate": 0.5961538461538461,
+        "totalR": -4.682757328663868,
+        "expectancy": -0.09005302555122824,
+        "profitFactor": 0.7208671515115441,
+        "maxDD": 8.681702498272529
       }
     },
     {
@@ -211,342 +296,549 @@
         "minRangeAtr": 1,
         "maxSweep": 1,
         "closeDepth": 0,
-        "trend": "ema200",
+        "trend": "none",
         "target": "mid",
         "slBufferAtr": 0.5,
-        "minRR": 0.75,
-        "maxBars": 12,
-        "skipWeekend": false
-      },
-      "folds": [
-        {
-          "trades": 13,
-          "expectancy": 0.4210196289870115
-        },
-        {
-          "trades": 9,
-          "expectancy": 0.3263872451618429
-        },
-        {
-          "trades": 6,
-          "expectancy": 0.21346413805861597
-        },
-        {
-          "trades": 13,
-          "expectancy": 0.4302797436213893
-        }
-      ],
-      "train": {
-        "trades": 41,
-        "wins": 30,
-        "winRate": 0.7317073170731707,
-        "totalR": 15.285161878717496,
-        "expectancy": 0.3728088263101828,
-        "profitFactor": 2.3385762675968826,
-        "maxDD": 2.106710748525466
-      },
-      "test": {
-        "trades": 26,
-        "wins": 12,
-        "winRate": 0.46153846153846156,
-        "totalR": -1.5875593673576986,
-        "expectancy": -0.061059975667603794,
-        "profitFactor": 0.8631217361420533,
-        "maxDD": 4.584556989638443
-      }
-    },
-    {
-      "params": {
-        "minRangeAtr": 0.75,
-        "maxSweep": 0.25,
-        "closeDepth": 0,
-        "trend": "ema50",
-        "target": "opposite",
-        "slBufferAtr": 0.5,
-        "minRR": 1.5,
+        "minRR": 0,
         "maxBars": 3,
-        "skipWeekend": false
+        "session": "all",
+        "bias": "prevDay",
+        "zone": "pd"
       },
       "folds": [
         {
-          "trades": 9,
-          "expectancy": 0.27901741736573676
+          "trades": 43,
+          "expectancy": 0.16955684824319164
         },
         {
-          "trades": 11,
-          "expectancy": 0.27591509923238705
+          "trades": 28,
+          "expectancy": 0.1429601302515224
         },
         {
-          "trades": 6,
-          "expectancy": 0.14812399702089998
+          "trades": 20,
+          "expectancy": 0.09241996684519048
         },
         {
-          "trades": 19,
-          "expectancy": 0.2907535282008536
+          "trades": 27,
+          "expectancy": 0.08353885100557758
         }
       ],
       "train": {
-        "trades": 45,
-        "wins": 24,
-        "winRate": 0.5333333333333333,
-        "totalR": 11.95928386578951,
-        "expectancy": 0.26576186368421134,
-        "profitFactor": 1.8858747807564107,
-        "maxDD": 3.4724975369245357
+        "trades": 118,
+        "wins": 90,
+        "winRate": 0.7627118644067796,
+        "totalR": 15.397776435554269,
+        "expectancy": 0.13048963080978193,
+        "profitFactor": 1.968807982362338,
+        "maxDD": 2.0216860010872715
       },
       "test": {
-        "trades": 33,
-        "wins": 13,
-        "winRate": 0.3939393939393939,
-        "totalR": -4.229576080253639,
-        "expectancy": -0.12816897212889816,
-        "profitFactor": 0.746005033272534,
-        "maxDD": 9.35072870767036
+        "trades": 53,
+        "wins": 32,
+        "winRate": 0.6037735849056604,
+        "totalR": -3.89313825437955,
+        "expectancy": -0.0734554387618783,
+        "profitFactor": 0.7679352795301893,
+        "maxDD": 8.247881719744463
       }
     },
     {
       "params": {
         "minRangeAtr": 1,
-        "maxSweep": 0.25,
+        "maxSweep": 1,
         "closeDepth": 0,
-        "trend": "ema50",
-        "target": "opposite",
+        "trend": "none",
+        "target": "mid",
         "slBufferAtr": 0.5,
-        "minRR": 1.5,
-        "maxBars": 3,
-        "skipWeekend": false
+        "minRR": 0,
+        "maxBars": 6,
+        "session": "all",
+        "bias": "prevDay",
+        "zone": "pd"
       },
       "folds": [
         {
-          "trades": 9,
-          "expectancy": 0.27901741736573676
+          "trades": 43,
+          "expectancy": 0.19265591651146588
         },
         {
-          "trades": 11,
-          "expectancy": 0.27591509923238705
+          "trades": 28,
+          "expectancy": 0.13680802162730193
         },
         {
-          "trades": 6,
-          "expectancy": 0.14812399702089998
+          "trades": 20,
+          "expectancy": 0.07569656374414255
         },
         {
-          "trades": 19,
-          "expectancy": 0.2907535282008536
+          "trades": 27,
+          "expectancy": 0.10666205785921781
         }
       ],
       "train": {
+        "trades": 118,
+        "wins": 97,
+        "winRate": 0.8220338983050848,
+        "totalR": 16.508635852639216,
+        "expectancy": 0.13990369366643404,
+        "profitFactor": 1.905465282373586,
+        "maxDD": 2.945857249211855
+      },
+      "test": {
+        "trades": 53,
+        "wins": 37,
+        "winRate": 0.6981132075471698,
+        "totalR": -0.7467219187064209,
+        "expectancy": -0.014089092805781526,
+        "profitFactor": 0.9540742685217497,
+        "maxDD": 6.114482544398316
+      }
+    },
+    {
+      "params": {
+        "minRangeAtr": 0.75,
+        "maxSweep": 0.5,
+        "closeDepth": 0,
+        "trend": "ema200",
+        "target": "mid",
+        "slBufferAtr": 0.5,
+        "minRR": 0,
+        "maxBars": 3,
+        "session": "asia",
+        "bias": "prevDay",
+        "zone": "any"
+      },
+      "folds": [
+        {
+          "trades": 14,
+          "expectancy": 0.19090485196794263
+        },
+        {
+          "trades": 19,
+          "expectancy": 0.1667897580457539
+        },
+        {
+          "trades": 13,
+          "expectancy": 0.1192544623123074
+        },
+        {
+          "trades": 14,
+          "expectancy": 0.11933585531385613
+        }
+      ],
+      "train": {
+        "trades": 60,
+        "wins": 55,
+        "winRate": 0.9166666666666666,
+        "totalR": 9.062683314874501,
+        "expectancy": 0.15104472191457502,
+        "profitFactor": 2.739533020818787,
+        "maxDD": 1.1030982622563203
+      },
+      "test": {
+        "trades": 28,
+        "wins": 17,
+        "winRate": 0.6071428571428571,
+        "totalR": -5.170457955615678,
+        "expectancy": -0.18465921270055993,
+        "profitFactor": 0.44102272934203984,
+        "maxDD": 5.170457955615678
+      }
+    },
+    {
+      "params": {
+        "minRangeAtr": 0.75,
+        "maxSweep": 0.5,
+        "closeDepth": 0,
+        "trend": "none",
+        "target": "mid",
+        "slBufferAtr": 0.5,
+        "minRR": 0,
+        "maxBars": 12,
+        "session": "asia",
+        "bias": "prevDay",
+        "zone": "any"
+      },
+      "folds": [
+        {
+          "trades": 35,
+          "expectancy": 0.1048721847369057
+        },
+        {
+          "trades": 28,
+          "expectancy": 0.10447347606849496
+        },
+        {
+          "trades": 22,
+          "expectancy": 0.24122071933709865
+        },
+        {
+          "trades": 33,
+          "expectancy": 0.11486896944732641
+        }
+      ],
+      "train": {
+        "trades": 118,
+        "wins": 104,
+        "winRate": 0.8813559322033898,
+        "totalR": 15.693315612887499,
+        "expectancy": 0.1329942001092161,
+        "profitFactor": 2.1661551981991263,
+        "maxDD": 2.4491065459346473
+      },
+      "test": {
+        "trades": 52,
+        "wins": 36,
+        "winRate": 0.6923076923076923,
+        "totalR": -5.066169425337693,
+        "expectancy": -0.09742633510264795,
+        "profitFactor": 0.6884933683012242,
+        "maxDD": 5.700720875689547
+      }
+    },
+    {
+      "params": {
+        "minRangeAtr": 0.75,
+        "maxSweep": 1,
+        "closeDepth": 0,
+        "trend": "none",
+        "target": "mid",
+        "slBufferAtr": 0.5,
+        "minRR": 0,
+        "maxBars": 3,
+        "session": "asia",
+        "bias": "prevDay",
+        "zone": "any"
+      },
+      "folds": [
+        {
+          "trades": 43,
+          "expectancy": 0.14319618902199072
+        },
+        {
+          "trades": 34,
+          "expectancy": 0.07020060709164742
+        },
+        {
+          "trades": 25,
+          "expectancy": 0.20978228210793293
+        },
+        {
+          "trades": 41,
+          "expectancy": 0.08405285767075556
+        }
+      ],
+      "train": {
+        "trades": 143,
+        "wins": 125,
+        "winRate": 0.8741258741258742,
+        "totalR": 17.234980986260904,
+        "expectancy": 0.12052434256126507,
+        "profitFactor": 2.1862752374206047,
+        "maxDD": 3.118788925749943
+      },
+      "test": {
+        "trades": 62,
+        "wins": 42,
+        "winRate": 0.6774193548387096,
+        "totalR": -5.128027375334733,
+        "expectancy": -0.08271011895701183,
+        "profitFactor": 0.7041724450668161,
+        "maxDD": 5.353226397043537
+      }
+    },
+    {
+      "params": {
+        "minRangeAtr": 0.75,
+        "maxSweep": 1,
+        "closeDepth": 0,
+        "trend": "none",
+        "target": "mid",
+        "slBufferAtr": 0.5,
+        "minRR": 0,
+        "maxBars": 12,
+        "session": "asia",
+        "bias": "none",
+        "zone": "any"
+      },
+      "folds": [
+        {
+          "trades": 89,
+          "expectancy": 0.07766758275590342
+        },
+        {
+          "trades": 67,
+          "expectancy": 0.12871670075550035
+        },
+        {
+          "trades": 60,
+          "expectancy": 0.0470986021000466
+        },
+        {
+          "trades": 79,
+          "expectancy": 0.06575345442048706
+        }
+      ],
+      "train": {
+        "trades": 295,
+        "wins": 247,
+        "winRate": 0.8372881355932204,
+        "totalR": 23.55687284111519,
+        "expectancy": 0.07985380624106844,
+        "profitFactor": 1.484775137217205,
+        "maxDD": 3.6643425774136453
+      },
+      "test": {
+        "trades": 129,
+        "wins": 85,
+        "winRate": 0.6589147286821705,
+        "totalR": -20.062333149213902,
+        "expectancy": -0.155521962397007,
+        "profitFactor": 0.5334909720372765,
+        "maxDD": 20.265590408203884
+      }
+    }
+  ],
+  "breakdown": [
+    {
+      "group": "session",
+      "value": "all",
+      "train": {
+        "trades": 217,
+        "wins": 172,
+        "winRate": 0.7926267281105991,
+        "totalR": -0.9369877034106731,
+        "expectancy": -0.004317915683920153,
+        "profitFactor": 0.97843342163098,
+        "maxDD": 6.8211762448938895
+      },
+      "test": {
+        "trades": 104,
+        "wins": 74,
+        "winRate": 0.7115384615384616,
+        "totalR": -8.699901598679197,
+        "expectancy": -0.08365289998729998,
+        "profitFactor": 0.7144686779534233,
+        "maxDD": 11.179082923436278
+      }
+    },
+    {
+      "group": "session",
+      "value": "key",
+      "train": {
+        "trades": 126,
+        "wins": 98,
+        "winRate": 0.7777777777777778,
+        "totalR": -2.858878909334719,
+        "expectancy": -0.02268951515345015,
+        "profitFactor": 0.89377613967407,
+        "maxDD": 5.481461706330943
+      },
+      "test": {
+        "trades": 60,
+        "wins": 44,
+        "winRate": 0.7333333333333333,
+        "totalR": -4.071903436421981,
+        "expectancy": -0.06786505727369968,
+        "profitFactor": 0.7492353306196505,
+        "maxDD": 7.005974035478214
+      }
+    },
+    {
+      "group": "session",
+      "value": "london",
+      "train": {
+        "trades": 89,
+        "wins": 65,
+        "winRate": 0.7303370786516854,
+        "totalR": -8.008351160035836,
+        "expectancy": -0.08998147370826783,
+        "profitFactor": 0.6487436721440576,
+        "maxDD": 9.237692488238352
+      },
+      "test": {
+        "trades": 42,
+        "wins": 28,
+        "winRate": 0.6666666666666666,
+        "totalR": -7.169992547639235,
+        "expectancy": -0.17071410827712463,
+        "profitFactor": 0.4953309327384835,
+        "maxDD": 8.011613003155873
+      }
+    },
+    {
+      "group": "session",
+      "value": "newyork",
+      "train": {
+        "trades": 77,
+        "wins": 60,
+        "winRate": 0.7792207792207793,
+        "totalR": -1.263135063520829,
+        "expectancy": -0.016404351474296478,
+        "profitFactor": 0.9233377578766466,
+        "maxDD": 5.263136759193207
+      },
+      "test": {
+        "trades": 38,
+        "wins": 31,
+        "winRate": 0.8157894736842105,
+        "totalR": 3.041429925379807,
+        "expectancy": 0.08003762961525808,
+        "profitFactor": 1.4261223811111166,
+        "maxDD": 3.05492014341831
+      }
+    },
+    {
+      "group": "session",
+      "value": "asia",
+      "train": {
+        "trades": 60,
+        "wins": 55,
+        "winRate": 0.9166666666666666,
+        "totalR": 9.729023267967108,
+        "expectancy": 0.1621503877994518,
+        "profitFactor": 2.8674333690073825,
+        "maxDD": 1.1030982622563203
+      },
+      "test": {
+        "trades": 27,
+        "wins": 18,
+        "winRate": 0.6666666666666666,
+        "totalR": -4.251496988169081,
+        "expectancy": -0.15746285141366967,
+        "profitFactor": 0.5340516557388385,
+        "maxDD": 4.251496988169081
+      }
+    },
+    {
+      "group": "bias",
+      "value": "none",
+      "train": {
+        "trades": 120,
+        "wins": 102,
+        "winRate": 0.85,
+        "totalR": 9.356355926387831,
+        "expectancy": 0.0779696327198986,
+        "profitFactor": 1.5005001195377174,
+        "maxDD": 3.073930765234741
+      },
+      "test": {
+        "trades": 50,
+        "wins": 31,
+        "winRate": 0.62,
+        "totalR": -10.302558996223006,
+        "expectancy": -0.20605117992446012,
+        "profitFactor": 0.4659053077915299,
+        "maxDD": 10.798744070191525
+      }
+    },
+    {
+      "group": "bias",
+      "value": "prevDay",
+      "train": {
+        "trades": 60,
+        "wins": 55,
+        "winRate": 0.9166666666666666,
+        "totalR": 9.729023267967108,
+        "expectancy": 0.1621503877994518,
+        "profitFactor": 2.8674333690073825,
+        "maxDD": 1.1030982622563203
+      },
+      "test": {
+        "trades": 27,
+        "wins": 18,
+        "winRate": 0.6666666666666666,
+        "totalR": -4.251496988169081,
+        "expectancy": -0.15746285141366967,
+        "profitFactor": 0.5340516557388385,
+        "maxDD": 4.251496988169081
+      }
+    },
+    {
+      "group": "bias",
+      "value": "dailyEma",
+      "train": {
+        "trades": 109,
+        "wins": 93,
+        "winRate": 0.8532110091743119,
+        "totalR": 8.939849335579831,
+        "expectancy": 0.08201696638146634,
+        "profitFactor": 1.5382612959815847,
+        "maxDD": 2.6802629483724694
+      },
+      "test": {
         "trades": 45,
-        "wins": 24,
-        "winRate": 0.5333333333333333,
-        "totalR": 11.95928386578951,
-        "expectancy": 0.26576186368421134,
-        "profitFactor": 1.8858747807564107,
-        "maxDD": 3.4724975369245357
+        "wins": 28,
+        "winRate": 0.6222222222222222,
+        "totalR": -9.286142224137812,
+        "expectancy": -0.2063587160919514,
+        "profitFactor": 0.4621541282186278,
+        "maxDD": 9.782327298106331
+      }
+    },
+    {
+      "group": "bias",
+      "value": "prevWeek",
+      "train": {
+        "trades": 83,
+        "wins": 72,
+        "winRate": 0.8674698795180723,
+        "totalR": 8.314498050343346,
+        "expectancy": 0.10017467530534152,
+        "profitFactor": 1.7293500367256172,
+        "maxDD": 3.0773340462687604
       },
       "test": {
         "trades": 32,
-        "wins": 12,
-        "winRate": 0.375,
-        "totalR": -5.918392895369658,
-        "expectancy": -0.18494977798030182,
-        "profitFactor": 0.6445880206393305,
-        "maxDD": 9.35072870767036
+        "wins": 20,
+        "winRate": 0.625,
+        "totalR": -6.126529169624726,
+        "expectancy": -0.1914540365507727,
+        "profitFactor": 0.49686190586653906,
+        "maxDD": 7.488854203145338
       }
     },
     {
-      "params": {
-        "minRangeAtr": 0.75,
-        "maxSweep": 0.5,
-        "closeDepth": 0,
-        "trend": "ema50",
-        "target": "opposite",
-        "slBufferAtr": 0.5,
-        "minRR": 1.5,
-        "maxBars": 6,
-        "skipWeekend": false
-      },
-      "folds": [
-        {
-          "trades": 9,
-          "expectancy": 0.325487561552271
-        },
-        {
-          "trades": 11,
-          "expectancy": 0.207359197383401
-        },
-        {
-          "trades": 7,
-          "expectancy": 0.18698786410941556
-        },
-        {
-          "trades": 20,
-          "expectancy": 0.4605104871026119
-        }
-      ],
+      "group": "zone",
+      "value": "any",
       "train": {
-        "trades": 47,
-        "wins": 26,
-        "winRate": 0.5531914893617021,
-        "totalR": 15.729464016005993,
-        "expectancy": 0.33466944714906366,
-        "profitFactor": 1.7923729072667782,
-        "maxDD": 4.416530318558318
+        "trades": 60,
+        "wins": 55,
+        "winRate": 0.9166666666666666,
+        "totalR": 9.729023267967108,
+        "expectancy": 0.1621503877994518,
+        "profitFactor": 2.8674333690073825,
+        "maxDD": 1.1030982622563203
       },
       "test": {
-        "trades": 34,
-        "wins": 14,
-        "winRate": 0.4117647058823529,
-        "totalR": -4.6953044702921,
-        "expectancy": -0.1380971903027088,
-        "profitFactor": 0.7593865063163755,
-        "maxDD": 9.059392961038352
+        "trades": 27,
+        "wins": 18,
+        "winRate": 0.6666666666666666,
+        "totalR": -4.251496988169081,
+        "expectancy": -0.15746285141366967,
+        "profitFactor": 0.5340516557388385,
+        "maxDD": 4.251496988169081
       }
     },
     {
-      "params": {
-        "minRangeAtr": 0.75,
-        "maxSweep": 1,
-        "closeDepth": 0,
-        "trend": "ema50",
-        "target": "opposite",
-        "slBufferAtr": 0.5,
-        "minRR": 1.5,
-        "maxBars": 6,
-        "skipWeekend": false
-      },
-      "folds": [
-        {
-          "trades": 9,
-          "expectancy": 0.325487561552271
-        },
-        {
-          "trades": 11,
-          "expectancy": 0.207359197383401
-        },
-        {
-          "trades": 7,
-          "expectancy": 0.18698786410941556
-        },
-        {
-          "trades": 20,
-          "expectancy": 0.4605104871026119
-        }
-      ],
+      "group": "zone",
+      "value": "pd",
       "train": {
-        "trades": 47,
-        "wins": 26,
-        "winRate": 0.5531914893617021,
-        "totalR": 15.729464016005993,
-        "expectancy": 0.33466944714906366,
-        "profitFactor": 1.7923729072667782,
-        "maxDD": 4.416530318558318
+        "trades": 19,
+        "wins": 17,
+        "winRate": 0.8947368421052632,
+        "totalR": 2.9515335102636913,
+        "expectancy": 0.1553438689612469,
+        "profitFactor": 2.412109882292089,
+        "maxDD": 1.0568092213028222
       },
       "test": {
-        "trades": 34,
-        "wins": 14,
-        "winRate": 0.4117647058823529,
-        "totalR": -4.6953044702921,
-        "expectancy": -0.1380971903027088,
-        "profitFactor": 0.7593865063163755,
-        "maxDD": 9.059392961038352
-      }
-    },
-    {
-      "params": {
-        "minRangeAtr": 1,
-        "maxSweep": 0.5,
-        "closeDepth": 0,
-        "trend": "ema50",
-        "target": "opposite",
-        "slBufferAtr": 0.5,
-        "minRR": 1.5,
-        "maxBars": 6,
-        "skipWeekend": false
-      },
-      "folds": [
-        {
-          "trades": 9,
-          "expectancy": 0.325487561552271
-        },
-        {
-          "trades": 11,
-          "expectancy": 0.207359197383401
-        },
-        {
-          "trades": 7,
-          "expectancy": 0.18698786410941556
-        },
-        {
-          "trades": 20,
-          "expectancy": 0.4605104871026119
-        }
-      ],
-      "train": {
-        "trades": 47,
-        "wins": 26,
-        "winRate": 0.5531914893617021,
-        "totalR": 15.729464016005993,
-        "expectancy": 0.33466944714906366,
-        "profitFactor": 1.7923729072667782,
-        "maxDD": 4.416530318558318
-      },
-      "test": {
-        "trades": 33,
-        "wins": 13,
-        "winRate": 0.3939393939393939,
-        "totalR": -6.384121285408119,
-        "expectancy": -0.19345822076994298,
-        "profitFactor": 0.6728421476602399,
-        "maxDD": 9.059392961038352
-      }
-    },
-    {
-      "params": {
-        "minRangeAtr": 1,
-        "maxSweep": 1,
-        "closeDepth": 0,
-        "trend": "ema50",
-        "target": "opposite",
-        "slBufferAtr": 0.5,
-        "minRR": 1.5,
-        "maxBars": 6,
-        "skipWeekend": false
-      },
-      "folds": [
-        {
-          "trades": 9,
-          "expectancy": 0.325487561552271
-        },
-        {
-          "trades": 11,
-          "expectancy": 0.207359197383401
-        },
-        {
-          "trades": 7,
-          "expectancy": 0.18698786410941556
-        },
-        {
-          "trades": 20,
-          "expectancy": 0.4605104871026119
-        }
-      ],
-      "train": {
-        "trades": 47,
-        "wins": 26,
-        "winRate": 0.5531914893617021,
-        "totalR": 15.729464016005993,
-        "expectancy": 0.33466944714906366,
-        "profitFactor": 1.7923729072667782,
-        "maxDD": 4.416530318558318
-      },
-      "test": {
-        "trades": 33,
-        "wins": 13,
-        "winRate": 0.3939393939393939,
-        "totalR": -6.384121285408119,
-        "expectancy": -0.19345822076994298,
-        "profitFactor": 0.6728421476602399,
-        "maxDD": 9.059392961038352
+        "trades": 9,
+        "wins": 5,
+        "winRate": 0.5555555555555556,
+        "totalR": -1.8397310547268144,
+        "expectancy": -0.20441456163631272,
+        "profitFactor": 0.547911750702203,
+        "maxDD": 2.5905669017120005
       }
     }
   ]

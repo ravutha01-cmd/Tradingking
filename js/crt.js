@@ -8,12 +8,23 @@
  *                stop below C2.low, target the middle or the high of C1.
  * Entry is the close of C2 (= open of C3).
  *
+ * Optional filters:
+ *   session — only trade when C2 is one of the chosen NY 4H candles (e.g. the key
+ *             1 AM / 5 AM / 9 AM NY CRT candles). Needs NY-aligned candles (Sessions.build4h).
+ *   bias    — higher-timeframe direction: previous daily candle, daily close vs daily
+ *             EMA20, or previous weekly candle. Only trades in that direction.
+ *   zone    — premium/discount: longs only below the previous day's midpoint, shorts above.
+ * Daily/weekly candles are built from the 4H candles and only completed ones are used,
+ * so there is no look-ahead.
+ *
  * Also contains a backtester, a grid-search optimizer with a train/test split,
  * and a journal that records live setups and resolves their outcomes.
  * Works in the browser (window.CRT) and Node (module.exports). */
 (function (root) {
   'use strict';
-  const I = typeof module !== 'undefined' && module.exports ? require('./indicators.js') : root.Indicators;
+  const node = typeof module !== 'undefined' && module.exports;
+  const I = node ? require('./indicators.js') : root.Indicators;
+  const S = node ? require('./sessions.js') : root.Sessions;
 
   const DEFAULT_PARAMS = {
     minRangeAtr: 1,     // C1 range must be >= this × ATR(14)
@@ -24,34 +35,83 @@
     slBufferAtr: 0.1,   // extra stop distance beyond the C2 wick, × ATR
     minRR: 1,           // skip setups whose reward:risk is below this
     maxBars: 6,         // close the trade at market after this many 4H candles
-    skipWeekend: true,  // gold spot is closed Fri 21:00 – Sun 22:00 UTC
+    session: 'all',     // 'all' | 'key' | 'london' | 'newyork' | 'asia' — see Sessions.SESSIONS
+    bias: 'none',       // 'none' | 'prevDay' | 'dailyEma' | 'prevWeek'
+    zone: 'any',        // 'any' | 'pd' (premium/discount vs previous day's range)
+  };
+
+  const BIASES = {
+    none: 'Off',
+    prevDay: 'Previous daily candle direction',
+    dailyEma: 'Daily close vs daily EMA20',
+    prevWeek: 'Previous weekly candle direction',
   };
 
   // Round-trip trading cost in price units (spread + commission), charged on every trade.
   const DEFAULT_COST = 0.4;
 
   const GRID = {
-    minRangeAtr: [0.75, 1, 1.5, 2],
-    maxSweep: [0.25, 0.5, 1],
-    closeDepth: [0, 0.25],
-    trend: ['none', 'ema50', 'ema200'],
+    minRangeAtr: [0.75, 1, 1.5],
+    maxSweep: [0.5, 1],
+    closeDepth: [0],
+    trend: ['none', 'ema200'],
     target: ['mid', 'opposite'],
-    slBufferAtr: [0, 0.25, 0.5],
+    slBufferAtr: [0.25, 0.5],
     minRR: [0, 0.75, 1.5],
     maxBars: [3, 6, 12],
-    skipWeekend: [true, false],
+    session: Object.keys(S.SESSIONS),
+    bias: Object.keys(BIASES),
+    zone: ['any', 'pd'],
   };
 
-  // Precompute indicators once per candle set.
-  function context(candles) {
-    const closes = candles.map((c) => c.close);
-    return { atr: I.atr(candles, 14), ema50: I.ema(closes, 50), ema200: I.ema(closes, 200) };
+  // Aggregate 4H candles into daily or weekly candles by NY trading-day/week key.
+  function aggregate(candles, keyFn) {
+    const out = [];
+    for (const c of candles) {
+      const k = keyFn(c.time);
+      const last = out[out.length - 1];
+      if (last && last.key === k) {
+        last.high = Math.max(last.high, c.high); last.low = Math.min(last.low, c.low); last.close = c.close;
+      } else out.push({ key: k, open: c.open, high: c.high, low: c.low, close: c.close });
+    }
+    return out;
   }
 
-  function isWeekend(time) {
-    const d = new Date(time);
-    const day = d.getUTCDay(), h = d.getUTCHours();
-    return day === 6 || (day === 0 && h < 20) || (day === 5 && h >= 21);
+  /* Precompute indicators and higher-timeframe state once per candle set.
+   * For each candle i, htf[i] describes the daily/weekly picture known at the moment
+   * candle i closes: the previous completed day/week (a day completes with its 1 PM NY
+   * candle), and the daily EMA20 over completed days. */
+  function context(candles) {
+    const closes = candles.map((c) => c.close);
+    const nyHour = candles.map((c) => (c.nyHour != null ? c.nyHour : S.nyHour(c.time)));
+    const days = aggregate(candles, S.dayKey);
+    const weeks = aggregate(candles, S.weekKey);
+    const dEma = I.ema(days.map((d) => d.close), 20);
+    const dayIdx = new Map(days.map((d, i) => [d.key, i]));
+    const weekIdx = new Map(weeks.map((w, i) => [w.key, i]));
+    const htf = candles.map((c, i) => {
+      const di = dayIdx.get(S.dayKey(c.time));
+      const prevD = nyHour[i] === 13 ? di : di - 1; // last 4H candle of the day completes it
+      const wi = weekIdx.get(S.weekKey(c.time));
+      const d = days[prevD], w = weeks[wi - 1];
+      return {
+        prevDayDir: d ? Math.sign(d.close - d.open) : 0,
+        prevDayMid: d ? (d.high + d.low) / 2 : null,
+        prevDayHigh: d ? d.high : null, prevDayLow: d ? d.low : null,
+        dailyEmaDir: d && dEma[prevD] != null ? Math.sign(d.close - dEma[prevD]) : 0,
+        dailyEma: d ? dEma[prevD] : null,
+        prevWeekDir: w ? Math.sign(w.close - w.open) : 0,
+      };
+    });
+    return { atr: I.atr(candles, 14), ema50: I.ema(closes, 50), ema200: I.ema(closes, 200), nyHour, htf };
+  }
+
+  // Direction the higher timeframe allows: 1 (longs), -1 (shorts) or 0 (no bias available).
+  function biasDir(h, bias) {
+    if (bias === 'prevDay') return h.prevDayDir;
+    if (bias === 'dailyEma') return h.dailyEmaDir;
+    if (bias === 'prevWeek') return h.prevWeekDir;
+    return null;
   }
 
   // Detect a CRT setup where candles[i] is C2 (closed) and candles[i-1] is C1.
@@ -60,7 +120,8 @@
     const c1 = candles[i - 1], c2 = candles[i];
     const atr = ctx.atr[i - 1];
     if (atr == null) return null;
-    if (p.skipWeekend && (isWeekend(c1.time) || isWeekend(c2.time))) return null;
+    const sess = S.SESSIONS[p.session || 'all'];
+    if (sess && sess.hours && !sess.hours.includes(ctx.nyHour[i])) return null;
     const range = c1.high - c1.low;
     if (range <= 0 || range < p.minRangeAtr * atr) return null;
 
@@ -78,6 +139,14 @@
       if (dir === -1 && c2.close > ema) return null;
     }
 
+    const h = ctx.htf[i];
+    if (p.bias && p.bias !== 'none' && biasDir(h, p.bias) !== dir) return null;
+    if (p.zone === 'pd') {
+      if (h.prevDayMid == null) return null;
+      if (dir === 1 && c2.close > h.prevDayMid) return null;   // buy only at a discount
+      if (dir === -1 && c2.close < h.prevDayMid) return null;  // sell only at a premium
+    }
+
     const entry = c2.close;
     const sl = dir === 1 ? c2.low - p.slBufferAtr * atr : c2.high + p.slBufferAtr * atr;
     const tp = p.target === 'mid' ? (c1.high + c1.low) / 2 : dir === 1 ? c1.high : c1.low;
@@ -87,7 +156,7 @@
     const rr = reward / risk;
     if (rr < p.minRR) return null;
     return {
-      index: i, time: c2.time, dir, side: dir === 1 ? 'LONG' : 'SHORT',
+      index: i, time: c2.time, nyHour: ctx.nyHour[i], dir, side: dir === 1 ? 'LONG' : 'SHORT',
       entry, sl, tp, risk, rr, c1High: c1.high, c1Low: c1.low,
     };
   }
@@ -209,6 +278,26 @@
     };
   }
 
+  /* One-at-a-time breakdown: keep `p` and swap just the session, bias or zone,
+   * reporting training and test results for each option. Shows which filter helps. */
+  function breakdown(candles, p, opts = {}) {
+    const ctx = context(candles);
+    const cost = opts.cost ?? DEFAULT_COST;
+    const cut = Math.floor(candles.length * (opts.split ?? 0.7));
+    const run = (q) => ({
+      train: stats(backtest(candles, q, { ctx, cost, from: 1, to: cut - 1 }).trades),
+      test: stats(backtest(candles, q, { ctx, cost, from: cut, to: candles.length - 1 }).trades),
+    });
+    const rows = [];
+    for (const k of Object.keys(S.SESSIONS)) rows.push({ group: 'session', value: k, ...run({ ...p, session: k }) });
+    for (const k of Object.keys(BIASES)) rows.push({ group: 'bias', value: k, ...run({ ...p, bias: k }) });
+    for (const k of ['any', 'pd']) rows.push({ group: 'zone', value: k, ...run({ ...p, zone: k }) });
+    return rows;
+  }
+
+  // Same grid with session/bias/zone switched off, to measure what the new filters add.
+  const BASELINE_GRID = { ...GRID, session: ['all'], bias: ['none'], zone: ['any'] };
+
   /* Journal: record live setups from `startedAt` onwards and resolve their outcomes.
    * Returns a new journal array (newest first). */
   function updateJournal(journal, candles, p, startedAt, cost = DEFAULT_COST) {
@@ -242,13 +331,13 @@
     const c1 = candles[lastClosed];
     const forming = candles[n - 1].closed ? null : candles[n - 1];
     return {
-      setup,
+      setup, htf: ctx.htf[n - 1], nyHour: ctx.nyHour[n - 1], c1NyHour: ctx.nyHour[lastClosed],
       watch: { high: c1.high, low: c1.low, range: c1.high - c1.low, atr: ctx.atr[lastClosed], time: c1.time },
       forming,
     };
   }
 
-  const api = { DEFAULT_PARAMS, DEFAULT_COST, GRID, robustScore, context, detect, simulate, backtest, optimize, stats, combos, updateJournal, current, isWeekend };
+  const api = { DEFAULT_PARAMS, DEFAULT_COST, GRID, BASELINE_GRID, BIASES, breakdown, robustScore, biasDir, context, detect, simulate, backtest, optimize, stats, combos, updateJournal, current };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else root.CRT = api;
 })(typeof window !== 'undefined' ? window : globalThis);
