@@ -182,3 +182,20 @@ summary { cursor: pointer; color: var(--gold); }
 small.used { color: var(--gold); font-size: 11px; margin-left: 4px; }
 tr.sel td { background: rgba(245, 197, 66, .08); }
 .card h3 small { color: var(--muted); font-weight: 400; }
+
+/* ---------- Research ---------- */
+.matrix td { vertical-align: top; }
+.matrix .big { font-size: 16px; font-weight: 700; display: block; }
+.matrix small { color: var(--muted); }
+.news-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+.news-card { background: var(--bg); border: 1px solid var(--border); border-radius: 8px; padding: 12px 14px; }
+.news-card h3 { margin: 0 0 8px; }
+.news-card table td { padding: 4px 2px; font-size: 13px; }
+.playbook { padding-left: 20px; margin: 8px 0 0; }
+.playbook li { margin: 6px 0; }
+.legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px; color: var(--muted); margin-top: 6px; }
+.legend i { display: inline-block; width: 14px; height: 3px; border-radius: 2px; margin-right: 6px; vertical-align: middle; }
+.chart .s1 { fill: none; stroke: #c08a1e; stroke-width: 2; }
+.chart .s2 { fill: none; stroke: #5f86d6; stroke-width: 2; }
+.chart .end-label { font-size: 11px; fill: var(--text); }
+footer code { color: var(--text); }

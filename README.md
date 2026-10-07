@@ -18,6 +18,7 @@ A static web app that shows **live XAUUSD (gold) trading signals**: it streams l
 - **Signal history**: new BUY/SELL signals are logged on candle close (saved in the browser).
 - **Alerts**: optional sound and desktop notification when a new signal appears.
 - Timeframes: 1m, 5m, 15m, 1H, 4H, 1D.
+- **Research** (`research.html`): live analysis on every timeframe (15m → weekly), the best-tested strategy for 2026 with live status, every strategy × timeframe result, and CPI / PPI / NFP / FOMC news behaviour with an upcoming-release calendar. See [Research](#research-xauusd-2026).
 - **TradingView indicator** (`tradingview/`): ICT Setup Checklist — bias table, sessions, liquidity sweeps, MSS, IRL, FVG/IFVG, 8-point checklist, entry/stop/target and alerts. See [tradingview/README.md](tradingview/README.md).
 - **CRT 4H Lab** (`crt.html`): Candle Range Theory strategy with recorded history, backtest, training and a live signal journal (see below).
 
@@ -83,6 +84,30 @@ npm run train      # writes data/xauusd-4h-ny.csv, data/crt-report.json, js/crt-
 
 TradingView widgets cannot hand their price data to other scripts, so the signal engine uses these feeds while the chart and rating come from TradingView.
 
+## Research (XAUUSD 2026)
+
+`research.html` is built from a study of every 5-minute gold candle since Aug 2020 (642,000 candles, Binance PAXG/USDT) and 297 official US release dates (BLS archives for CPI, PPI and the jobs report; federalreserve.gov for FOMC — `data/events/us-macro-events.json`).
+
+**Method.** Five strategy families (EMA trend, Donchian breakout, RSI trend pullback, Bollinger mean reversion, Asia-range breakout) × four timeframes (15m, 1H, 4H, daily), every combination of settings, $0.40 cost per trade, next-candle fills, minimum stop 0.05% of price. Settings are chosen on **Sep 2020 – Dec 2024 only** and must be profitable in 3 of 4 slices of it; **2025–2026 is the unseen test**.
+
+**Results (Oct 2026):**
+
+| | 2020–24 (training) | 2025–26 (test) | 2026 so far |
+|---|---|---|---|
+| **Trend portfolio** — 1H RSI pullback + 4H EMA crossover + 4H Donchian, 0.33% risk each | +46%, max DD 4% | **+22%, max DD 4%** | +4.3% |
+| Buy & hold gold (full position) | +35% | +58% (DD 30%) | −4% |
+| First pick by Sharpe — 15m Bollinger mean reversion | +2309%, DD 64% | **−80%** | −47% |
+
+- Trend-following worked in 2025–26 because gold trended hard (to ~$5,630 in Jan 2026); mean reversion broke down. The drawdown cap that excludes the failed first pick was added after seeing that failure — treat the portfolio's test result with some caution.
+- **News:** the first 5 minutes after CPI, NFP and FOMC are ~4× wider than normal (PPI 2×); typical 4-hour moves in 2026 are $14 (CPI), $21 (PPI), $34 (NFP), $80 (FOMC). The direction of the first 15 minutes continues only 44–57% of the time — a coin flip. The best tested rule (trade the first break of the 30-min pre-release range) made +0.12R per trade in training and +0.25R over 74 releases in 2025–26, but was negative for CPI and FOMC alone. Forecast-vs-actual ("surprise") data is not included.
+
+Regenerate (≈ 3 min download + 20 s):
+
+```bash
+NODE_USE_ENV_PROXY=1 node scripts/research/fetch-5m.js   # 5m candles → data/cache (not committed)
+node scripts/research/run.js                             # → data/research/report.json, js/research-data.js
+```
+
 ## Run it
 
 The app is plain HTML/CSS/JS, with no build step.
@@ -118,6 +143,9 @@ js/sessions.js      New York time, sessions, NY-aligned 4H candles
 js/history.js       1H candle recorder (Binance, saved in the browser)
 js/crt-lab.js       CRT Lab UI
 js/crt-trained.js   built-in trained CRT settings (generated)
+js/research.js      Research page UI (live multi-timeframe analysis, strategy status, news)
+js/research-data.js research results (generated)
+scripts/research/   5m download, strategy backtester, news event study
 scripts/train-crt.js  command-line training
 data/               recorded NY 4H history (CSV) and training report
 tests/              node:test unit tests

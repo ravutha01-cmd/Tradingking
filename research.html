@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TradingKing · XAUUSD Research</title>
+  <meta name="description" content="XAUUSD multi-timeframe analysis, the best-tested strategy for 2026, and CPI / PPI / NFP / FOMC news behaviour." />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">👑 TradingKing <span>Research</span></div>
+    <nav class="nav"><a href="index.html">Dashboard</a><a href="crt.html">CRT 4H Lab</a><a href="research.html" class="active">Research</a></nav>
+    <div class="ticker">
+      <span class="price" id="price">—</span>
+      <span class="status" id="status"><i></i><b>loading</b></span>
+    </div>
+  </header>
+
+  <main class="lab">
+    <section class="card span3">
+      <h2>Market now · all timeframes <small id="nowTime"></small></h2>
+      <div class="verdict" id="overall">Loading live data…</div>
+      <div class="table-scroll"><table class="history" id="mtf"></table></div>
+      <div class="tiles" id="levels"></div>
+      <p class="hint">Live from Binance PAXG/USDT (tracks XAU/USD). Trend: price vs EMA50 vs EMA200. Signal: the dashboard's indicator score (EMA, MACD, RSI, Bollinger). Levels: previous day / week high-low and the last 20 candles' range on each timeframe.</p>
+    </section>
+
+    <section class="card span3">
+      <h2>Best strategy for 2026 <small>trend portfolio · 1H + 4H</small></h2>
+      <div id="bestIntro"></div>
+      <div class="tiles" id="bestTiles"></div>
+      <div class="chart" id="equity"></div>
+      <div class="legend" id="legend"></div>
+      <h3>The three rules</h3>
+      <div class="table-scroll"><table class="history" id="legs"></table></div>
+      <h3>Live status of each rule</h3>
+      <div class="table-scroll"><table class="history" id="legStatus"><tr><td>Loading…</td></tr></table></div>
+      <details>
+        <summary>How it was chosen (and what failed)</summary>
+        <div id="method"></div>
+      </details>
+    </section>
+
+    <section class="card span3">
+      <h2>Every strategy on every timeframe</h2>
+      <p class="hint">Settings for each cell were chosen on 2020–2024 only. The big number is the result on 2025–2026, which the search never saw (1% risk per trade, compounded, after $0.40 costs per trade).</p>
+      <div class="table-scroll"><table class="history matrix" id="matrix"></table></div>
+    </section>
+
+    <section class="card span3">
+      <h2>News trading · CPI, PPI, NFP, FOMC</h2>
+      <div class="news-grid" id="newsCards"></div>
+      <h3>News trading rules tested</h3>
+      <div class="table-scroll"><table class="history" id="newsRules"></table></div>
+      <h3>News playbook</h3>
+      <ol class="playbook" id="playbook"></ol>
+    </section>
+
+    <section class="card span3">
+      <h2>Upcoming US releases</h2>
+      <div class="table-scroll"><table class="history" id="upcoming"></table></div>
+    </section>
+  </main>
+
+  <footer>
+    Research on Binance PAXG/USDT 5-minute data (a gold-backed token that tracks XAU/USD; spot-broker prices can differ by a few dollars and react differently in the first seconds of news).
+    Backtests use simple fill assumptions and fixed costs. Past results do not guarantee future results. Educational use only — not financial advice.
+    Regenerate: <code>node scripts/research/fetch-5m.js &amp;&amp; node scripts/research/run.js</code>
+  </footer>
+
+  <script src="js/indicators.js"></script>
+  <script src="js/signals.js"></script>
+  <script src="js/sessions.js"></script>
+  <script src="js/history.js"></script>
+  <script src="js/data.js"></script>
+  <script src="scripts/research/lib.js"></script>
+  <script src="js/research-data.js"></script>
+  <script src="js/research.js"></script>
+</body>
+</html>

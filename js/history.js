@@ -6,7 +6,7 @@
   'use strict';
   const REST = 'https://data-api.binance.vision/api/v3/klines';
   const SYMBOL = 'PAXGUSDT';
-  const INTERVAL_MS = { '1h': 3600e3, '4h': 4 * 3600e3, '1d': 86400e3 };
+  const INTERVAL_MS = { '5m': 300e3, '15m': 900e3, '1h': 3600e3, '4h': 4 * 3600e3, '1d': 86400e3 };
   const KEY = (interval) => `tradingking.candles.${SYMBOL}.${interval}`;
 
   async function fetchRange(interval, startTime, onProgress) {
