@@ -18,6 +18,7 @@ A static web app that shows **live XAUUSD (gold) trading signals**: it streams l
 - **Signal history**: new BUY/SELL signals are logged on candle close (saved in the browser).
 - **Alerts**: optional sound and desktop notification when a new signal appears.
 - Timeframes: 1m, 5m, 15m, 1H, 4H, 1D.
+- **TradingView indicator** (`tradingview/`): ICT Setup Checklist — bias table, sessions, liquidity sweeps, MSS, IRL, FVG/IFVG, 8-point checklist, entry/stop/target and alerts. See [tradingview/README.md](tradingview/README.md).
 - **CRT 4H Lab** (`crt.html`): Candle Range Theory strategy with recorded history, backtest, training and a live signal journal (see below).
 
 ## CRT 4H strategy (Candle Range Theory)

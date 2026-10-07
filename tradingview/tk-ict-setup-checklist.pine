@@ -1,0 +1,642 @@
+// This Pine Script® code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// TradingKing · ICT Setup Checklist
+//
+// Finds ICT-style reversal setups and scores them with an 8-point checklist:
+//   1. Liquidity Sweep   – price wicks through a liquidity level (session high/low,
+//                          previous day high/low or an internal swing) and closes back inside
+//   2. HTF POI Delivery  – the sweep happened at a higher-timeframe point of interest
+//                          (an HTF fair value gap or the previous day high/low)
+//   3. MSS Confirmed     – after the sweep, a candle closes beyond the last internal swing
+//                          (market structure shift) within "Max bars from sweep to MSS"
+//   4. Macro Window      – the sweep or MSS happened inside an ICT macro time (NY time)
+//   5. Equilibrium       – longs enter in discount / shorts in premium of the dealing range
+//   6. Volume Influx     – volume between sweep and MSS reached N × its average
+//   7. IFVG              – an opposing fair value gap was closed through (inverted) during the move
+//   8. Clear Targets     – unmitigated liquidity sits at least "min reward:risk" away
+// It also shows a multi-timeframe bias table, session boxes, IRL (internal range
+// liquidity) levels, chart and HTF fair value gaps, and an entry / stop / target plan.
+//
+// Educational tool — not financial advice. Signals are confirmed on bar close.
+
+//@version=6
+indicator("TradingKing · ICT Setup Checklist", shorttitle = "TK ICT Checklist", overlay = true, max_boxes_count = 500, max_lines_count = 500, max_labels_count = 500)
+
+// ═════════════════════════════ Inputs ═════════════════════════════
+string TZ = "America/New_York"
+
+string G_BIAS = "Higher-timeframe bias"
+string tf1 = input.timeframe("15", "Timeframe 1", group = G_BIAS)
+string tf2 = input.timeframe("60", "Timeframe 2", group = G_BIAS)
+string tf3 = input.timeframe("240", "Timeframe 3", group = G_BIAS)
+string tf4 = input.timeframe("D", "Timeframe 4", group = G_BIAS)
+int biasLen = input.int(3, "HTF swing length", minval = 1, tooltip = "Bias turns bullish when an HTF candle closes above the last HTF swing high, bearish when it closes below the last HTF swing low.", group = G_BIAS)
+
+string G_SESS = "Sessions (New York time)"
+bool showSess = input.bool(true, "Show session boxes", group = G_SESS)
+string asiaSess = input.session("2000-0000", "Asia", group = G_SESS)
+string londonSess = input.session("0200-0500", "London", group = G_SESS)
+string nySess = input.session("0930-1100", "New York AM", group = G_SESS)
+string macroSess = input.string("0233-0300,0403-0430,0850-0910,0950-1010,1050-1110,1150-1210,1310-1340,1515-1545", "Macro windows", tooltip = "Comma-separated NY-time ranges (HHMM-HHMM). Best used on 1–15 minute charts.", group = G_SESS)
+
+string G_STRUCT = "Structure & liquidity"
+int swingLen = input.int(3, "Internal swing length (IRL / MSS)", minval = 1, group = G_STRUCT)
+bool showIRL = input.bool(true, "Show IRL levels", group = G_STRUCT)
+int maxIRL = input.int(8, "Max IRL levels per side", minval = 1, maxval = 30, group = G_STRUCT)
+int setupBars = input.int(20, "Max bars from sweep to MSS", minval = 1, group = G_STRUCT)
+bool sweepSwings = input.bool(true, "Count internal swings as liquidity", group = G_STRUCT)
+
+string G_FVG = "Fair value gaps"
+bool showFvg = input.bool(true, "Show chart FVGs", group = G_FVG)
+int maxFvg = input.int(10, "Max chart FVGs per side", minval = 1, maxval = 50, group = G_FVG)
+string htfFvgTf = input.timeframe("60", "HTF FVG timeframe", group = G_FVG)
+bool showHtfFvg = input.bool(true, "Show HTF FVG target lines", group = G_FVG)
+int maxHtfFvg = input.int(6, "Max HTF FVGs per side", minval = 1, maxval = 30, group = G_FVG)
+
+string G_CHECK = "Checklist"
+float volMult = input.float(1.5, "Volume influx: ≥ × average volume", minval = 1.0, step = 0.1, group = G_CHECK)
+int volLen = input.int(20, "Volume average length", minval = 2, group = G_CHECK)
+int rangeLen = input.int(50, "Dealing range lookback (equilibrium)", minval = 5, group = G_CHECK)
+float minRR = input.float(2.0, "Clear targets: min reward:risk", minval = 0.5, step = 0.1, group = G_CHECK)
+int minScore = input.int(6, "Alert when score ≥", minval = 1, maxval = 8, group = G_CHECK)
+bool showTrade = input.bool(true, "Draw entry / stop / target", group = G_CHECK)
+int tradeBars = input.int(20, "Trade box length (bars)", minval = 5, group = G_CHECK)
+
+string G_STYLE = "Style"
+color bullCol = input.color(color.new(#26a69a, 0), "Bullish", group = G_STYLE)
+color bearCol = input.color(color.new(#ef5350, 0), "Bearish", group = G_STYLE)
+color asiaCol = input.color(color.new(#7e57c2, 0), "Asia", group = G_STYLE)
+color londonCol = input.color(color.new(#2962ff, 0), "London", group = G_STYLE)
+color nyCol = input.color(color.new(#ff9800, 0), "New York", group = G_STYLE)
+color levelCol = input.color(color.new(#787b86, 0), "Levels", group = G_STYLE)
+string biasPos = input.string("Top right", "Bias table", options = ["Top right", "Top left", "Bottom right", "Bottom left", "Hidden"], group = G_STYLE)
+string checkPos = input.string("Bottom right", "Checklist table", options = ["Top right", "Top left", "Bottom right", "Bottom left", "Hidden"], group = G_STYLE)
+
+// ═════════════════════════════ Helpers ═════════════════════════════
+f_pos(string p) =>
+    p == "Top left" ? position.top_left : p == "Bottom right" ? position.bottom_right : p == "Bottom left" ? position.bottom_left : position.top_right
+
+f_tfName(string tf) =>
+    int s = timeframe.in_seconds(tf)
+    s >= 604800 ? "Weekly" : s >= 86400 ? "Daily" : s >= 3600 ? str.tostring(math.round(s / 3600)) + "H" : str.tostring(math.round(s / 60)) + "m"
+
+// HTF market-structure bias: 1 after a close above the last swing high, -1 after a close below the last swing low.
+f_bias(int len) =>
+    float hp = ta.pivothigh(high, len, len)
+    float lp = ta.pivotlow(low, len, len)
+    var float lastH = na
+    var float lastL = na
+    var int b = 0
+    if not na(hp)
+        lastH := hp
+    if not na(lp)
+        lastL := lp
+    if not na(lastH) and close > lastH
+        b := 1
+        lastH := na
+    if not na(lastL) and close < lastL
+        b := -1
+        lastL := na
+    b
+
+// Session box; returns the high/low of the last completed session.
+f_session(string sess, string name, color col) =>
+    bool inS = not na(time(timeframe.period, sess, TZ))
+    var box bx = na
+    var float hi = na
+    var float lo = na
+    var float doneHi = na
+    var float doneLo = na
+    if inS and not inS[1]
+        hi := high
+        lo := low
+        if showSess
+            bx := box.new(bar_index, high, bar_index, low, border_color = color.new(col, 40), bgcolor = color.new(col, 92), text = name, text_color = color.new(col, 20), text_size = size.small, text_halign = text.align_left, text_valign = text.align_top)
+    else if inS
+        hi := math.max(hi, high)
+        lo := math.min(lo, low)
+        if showSess and not na(bx)
+            box.set_top(bx, hi)
+            box.set_bottom(bx, lo)
+            box.set_right(bx, bar_index)
+    if not inS and inS[1]
+        doneHi := hi
+        doneLo := lo
+    [doneHi, doneLo]
+
+// Lowest value in `arr` that is ≥ minLvl (or highest ≤ maxLvl when below = true).
+f_bestTarget(array<float> arr, float lvl, bool below) =>
+    float best = na
+    int n = array.size(arr)
+    if n > 0
+        for i = 0 to n - 1
+            float v = array.get(arr, i)
+            if below
+                if v <= lvl and (na(best) or v > best)
+                    best := v
+            else
+                if v >= lvl and (na(best) or v < best)
+                    best := v
+    best
+
+f_pick(float best, float v, float lvl, bool below) =>
+    float out = best
+    if not na(v)
+        if below
+            if v <= lvl and (na(best) or v > best)
+                out := v
+        else
+            if v >= lvl and (na(best) or v < best)
+                out := v
+    out
+
+// True if the bar's range touches any zone [bots[i], tops[i]].
+f_touches(array<float> bots, array<float> tops) =>
+    bool hit = false
+    int n = array.size(bots)
+    if n > 0
+        for i = 0 to n - 1
+            if low <= array.get(tops, i) and high >= array.get(bots, i)
+                hit := true
+    hit
+
+f_mark(bool ok) =>
+    ok ? "✅" : "❌"
+
+// ═════════════════════════════ Data ═════════════════════════════
+bool confirmed = barstate.isconfirmed
+
+int b1 = request.security(syminfo.tickerid, tf1, f_bias(biasLen)[1], lookahead = barmerge.lookahead_on)
+int b2 = request.security(syminfo.tickerid, tf2, f_bias(biasLen)[1], lookahead = barmerge.lookahead_on)
+int b3 = request.security(syminfo.tickerid, tf3, f_bias(biasLen)[1], lookahead = barmerge.lookahead_on)
+int b4 = request.security(syminfo.tickerid, tf4, f_bias(biasLen)[1], lookahead = barmerge.lookahead_on)
+
+[pdh, pdl] = request.security(syminfo.tickerid, "D", [high[1], low[1]], lookahead = barmerge.lookahead_on)
+
+[asiaHi, asiaLo] = f_session(asiaSess, "Asia", asiaCol)
+[lonHi, lonLo] = f_session(londonSess, "London", londonCol)
+[nyHi, nyLo] = f_session(nySess, "New York", nyCol)
+
+bool inMacro = not na(time(timeframe.period, macroSess, TZ))
+
+float volAvg = ta.sma(volume, volLen)
+float volRatio = volAvg > 0 ? volume / volAvg : 0.0
+
+float rangeHi = ta.highest(high, rangeLen)
+float rangeLo = ta.lowest(low, rangeLen)
+float rangeMid = (rangeHi + rangeLo) / 2
+
+// ═════════════════════════════ Internal swings & IRL ═════════════════════════════
+float ph = ta.pivothigh(high, swingLen, swingLen)
+float pl = ta.pivotlow(low, swingLen, swingLen)
+
+var float swingH = na
+var int swingHBar = na
+var float swingL = na
+var int swingLBar = na
+
+var array<float> irlHLvl = array.new<float>()
+var array<line> irlHLine = array.new<line>()
+var array<label> irlHLab = array.new<label>()
+var array<float> irlLLvl = array.new<float>()
+var array<line> irlLLine = array.new<line>()
+var array<label> irlLLab = array.new<label>()
+
+// Extend unmitigated IRL levels; drop the ones price has traded through.
+if array.size(irlHLvl) > 0
+    for i = array.size(irlHLvl) - 1 to 0
+        line ln = array.get(irlHLine, i)
+        label lb = array.get(irlHLab, i)
+        if high > array.get(irlHLvl, i)
+            if not na(ln)
+                line.set_x2(ln, bar_index)
+            if not na(lb)
+                label.delete(lb)
+            array.remove(irlHLvl, i)
+            array.remove(irlHLine, i)
+            array.remove(irlHLab, i)
+        else
+            if not na(ln)
+                line.set_x2(ln, bar_index)
+            if not na(lb)
+                label.set_x(lb, bar_index)
+if array.size(irlLLvl) > 0
+    for i = array.size(irlLLvl) - 1 to 0
+        line ln = array.get(irlLLine, i)
+        label lb = array.get(irlLLab, i)
+        if low < array.get(irlLLvl, i)
+            if not na(ln)
+                line.set_x2(ln, bar_index)
+            if not na(lb)
+                label.delete(lb)
+            array.remove(irlLLvl, i)
+            array.remove(irlLLine, i)
+            array.remove(irlLLab, i)
+        else
+            if not na(ln)
+                line.set_x2(ln, bar_index)
+            if not na(lb)
+                label.set_x(lb, bar_index)
+
+if not na(ph)
+    swingH := ph
+    swingHBar := bar_index - swingLen
+    line ln = showIRL ? line.new(swingHBar, ph, bar_index, ph, color = color.new(levelCol, 20), style = line.style_dotted) : na
+    label lb = showIRL ? label.new(bar_index, ph, "IRL", style = label.style_label_left, color = color.new(color.black, 100), textcolor = levelCol, size = size.tiny) : na
+    array.push(irlHLvl, ph)
+    array.push(irlHLine, ln)
+    array.push(irlHLab, lb)
+    if array.size(irlHLvl) > maxIRL
+        label old = array.shift(irlHLab)
+        if not na(old)
+            label.delete(old)
+        array.shift(irlHLvl)
+        array.shift(irlHLine)
+if not na(pl)
+    swingL := pl
+    swingLBar := bar_index - swingLen
+    line ln = showIRL ? line.new(swingLBar, pl, bar_index, pl, color = color.new(levelCol, 20), style = line.style_dotted) : na
+    label lb = showIRL ? label.new(bar_index, pl, "IRL", style = label.style_label_left, color = color.new(color.black, 100), textcolor = levelCol, size = size.tiny) : na
+    array.push(irlLLvl, pl)
+    array.push(irlLLine, ln)
+    array.push(irlLLab, lb)
+    if array.size(irlLLvl) > maxIRL
+        label old = array.shift(irlLLab)
+        if not na(old)
+            label.delete(old)
+        array.shift(irlLLvl)
+        array.shift(irlLLine)
+
+// ═════════════════════════════ Fair value gaps ═════════════════════════════
+var array<float> fBullTop = array.new<float>()
+var array<float> fBullBot = array.new<float>()
+var array<box> fBullBox = array.new<box>()
+var array<float> fBearTop = array.new<float>()
+var array<float> fBearBot = array.new<float>()
+var array<box> fBearBox = array.new<box>()
+
+bool bullIfvg = false   // a bearish FVG was closed through upward  → bullish inversion
+bool bearIfvg = false   // a bullish FVG was closed through downward → bearish inversion
+
+if array.size(fBearTop) > 0
+    for i = array.size(fBearTop) - 1 to 0
+        box bx = array.get(fBearBox, i)
+        if close > array.get(fBearTop, i)
+            bullIfvg := true
+            if not na(bx)
+                box.set_right(bx, bar_index)
+                box.set_bgcolor(bx, color.new(bullCol, 85))
+                box.set_text(bx, "IFVG")
+            array.remove(fBearTop, i)
+            array.remove(fBearBot, i)
+            array.remove(fBearBox, i)
+        else if not na(bx)
+            box.set_right(bx, bar_index)
+if array.size(fBullTop) > 0
+    for i = array.size(fBullTop) - 1 to 0
+        box bx = array.get(fBullBox, i)
+        if close < array.get(fBullBot, i)
+            bearIfvg := true
+            if not na(bx)
+                box.set_right(bx, bar_index)
+                box.set_bgcolor(bx, color.new(bearCol, 85))
+                box.set_text(bx, "IFVG")
+            array.remove(fBullTop, i)
+            array.remove(fBullBot, i)
+            array.remove(fBullBox, i)
+        else if not na(bx)
+            box.set_right(bx, bar_index)
+
+if low > high[2]
+    box bx = showFvg ? box.new(bar_index - 2, low, bar_index, high[2], border_color = color.new(bullCol, 100), bgcolor = color.new(bullCol, 88), text = "FVG", text_color = color.new(bullCol, 30), text_size = size.tiny, text_halign = text.align_right) : na
+    array.push(fBullTop, low)
+    array.push(fBullBot, high[2])
+    array.push(fBullBox, bx)
+    if array.size(fBullTop) > maxFvg
+        array.shift(fBullTop)
+        array.shift(fBullBot)
+        array.shift(fBullBox)
+if high < low[2]
+    box bx = showFvg ? box.new(bar_index - 2, low[2], bar_index, high, border_color = color.new(bearCol, 100), bgcolor = color.new(bearCol, 88), text = "FVG", text_color = color.new(bearCol, 30), text_size = size.tiny, text_halign = text.align_right) : na
+    array.push(fBearTop, low[2])
+    array.push(fBearBot, high)
+    array.push(fBearBox, bx)
+    if array.size(fBearTop) > maxFvg
+        array.shift(fBearTop)
+        array.shift(fBearBot)
+        array.shift(fBearBox)
+
+// Higher-timeframe FVGs (from the last completed HTF candle — no repainting).
+[hBull, hBullBot, hBullTop, hBear, hBearBot, hBearTop] = request.security(syminfo.tickerid, htfFvgTf, [low[1] > high[3], high[3], low[1], high[1] < low[3], high[1], low[3]], lookahead = barmerge.lookahead_on)
+int tHtf = time(htfFvgTf)
+bool newHtf = bar_index > 0 and tHtf != tHtf[1]
+string htfName = f_tfName(htfFvgTf) + " FVG"
+
+var array<float> hBullBotA = array.new<float>()
+var array<float> hBullTopA = array.new<float>()
+var array<line> hBullLn = array.new<line>()
+var array<label> hBullLb = array.new<label>()
+var array<float> hBearBotA = array.new<float>()
+var array<float> hBearTopA = array.new<float>()
+var array<line> hBearLn = array.new<line>()
+var array<label> hBearLb = array.new<label>()
+
+if array.size(hBullBotA) > 0
+    for i = array.size(hBullBotA) - 1 to 0
+        line ln = array.get(hBullLn, i)
+        label lb = array.get(hBullLb, i)
+        if low < array.get(hBullBotA, i)
+            if not na(ln)
+                line.set_x2(ln, bar_index)
+            if not na(lb)
+                label.delete(lb)
+            array.remove(hBullBotA, i)
+            array.remove(hBullTopA, i)
+            array.remove(hBullLn, i)
+            array.remove(hBullLb, i)
+        else
+            if not na(ln)
+                line.set_x2(ln, bar_index)
+            if not na(lb)
+                label.set_x(lb, bar_index)
+if array.size(hBearBotA) > 0
+    for i = array.size(hBearBotA) - 1 to 0
+        line ln = array.get(hBearLn, i)
+        label lb = array.get(hBearLb, i)
+        if high > array.get(hBearTopA, i)
+            if not na(ln)
+                line.set_x2(ln, bar_index)
+            if not na(lb)
+                label.delete(lb)
+            array.remove(hBearBotA, i)
+            array.remove(hBearTopA, i)
+            array.remove(hBearLn, i)
+            array.remove(hBearLb, i)
+        else
+            if not na(ln)
+                line.set_x2(ln, bar_index)
+            if not na(lb)
+                label.set_x(lb, bar_index)
+
+if newHtf and hBull
+    // Bullish HTF FVG sits below price: its top is the level price trades back into.
+    line ln = showHtfFvg ? line.new(bar_index, hBullTop, bar_index, hBullTop, color = color.new(bullCol, 30), style = line.style_dashed) : na
+    label lb = showHtfFvg ? label.new(bar_index, hBullTop, htfName, style = label.style_label_left, color = color.new(color.black, 100), textcolor = bullCol, size = size.tiny) : na
+    array.push(hBullBotA, hBullBot)
+    array.push(hBullTopA, hBullTop)
+    array.push(hBullLn, ln)
+    array.push(hBullLb, lb)
+    if array.size(hBullBotA) > maxHtfFvg
+        label old = array.shift(hBullLb)
+        if not na(old)
+            label.delete(old)
+        array.shift(hBullBotA)
+        array.shift(hBullTopA)
+        array.shift(hBullLn)
+if newHtf and hBear
+    line ln = showHtfFvg ? line.new(bar_index, hBearBot, bar_index, hBearBot, color = color.new(bearCol, 30), style = line.style_dashed) : na
+    label lb = showHtfFvg ? label.new(bar_index, hBearBot, htfName, style = label.style_label_left, color = color.new(color.black, 100), textcolor = bearCol, size = size.tiny) : na
+    array.push(hBearBotA, hBearBot)
+    array.push(hBearTopA, hBearTop)
+    array.push(hBearLn, ln)
+    array.push(hBearLb, lb)
+    if array.size(hBearBotA) > maxHtfFvg
+        label old = array.shift(hBearLb)
+        if not na(old)
+            label.delete(old)
+        array.shift(hBearBotA)
+        array.shift(hBearTopA)
+        array.shift(hBearLn)
+
+// ═════════════════════════════ Liquidity sweeps ═════════════════════════════
+// Sell-side sweep (bullish): wick below a level, close back above it.
+string bullName = ""
+if confirmed
+    if not na(pdl) and low < pdl and close > pdl
+        bullName := "PDL"
+    else if not na(lonLo) and low < lonLo and close > lonLo
+        bullName := "London L"
+    else if not na(asiaLo) and low < asiaLo and close > asiaLo
+        bullName := "Asia L"
+    else if not na(nyLo) and low < nyLo and close > nyLo
+        bullName := "NY L"
+    else if sweepSwings and not na(swingL) and low < swingL and close > swingL
+        bullName := "Swing L"
+// Buy-side sweep (bearish): wick above a level, close back below it.
+string bearName = ""
+if confirmed
+    if not na(pdh) and high > pdh and close < pdh
+        bearName := "PDH"
+    else if not na(lonHi) and high > lonHi and close < lonHi
+        bearName := "London H"
+    else if not na(asiaHi) and high > asiaHi and close < asiaHi
+        bearName := "Asia H"
+    else if not na(nyHi) and high > nyHi and close < nyHi
+        bearName := "NY H"
+    else if sweepSwings and not na(swingH) and high > swingH and close < swingH
+        bearName := "Swing H"
+
+bool poiBull = (not na(pdl) and low < pdl) or f_touches(hBullBotA, hBullTopA)
+bool poiBear = (not na(pdh) and high > pdh) or f_touches(hBearBotA, hBearTopA)
+
+// ═════════════════════════════ Setup state ═════════════════════════════
+// Bullish setup in progress (after a sell-side sweep, waiting for MSS).
+var bool bPend = false
+var int bSweepBar = na
+var float bStop = na
+var string bName = ""
+var bool bPoi = false
+var bool bMacro = false
+var float bVol = 0.0
+var bool bIfvg = false
+// Bearish setup in progress.
+var bool sPend = false
+var int sSweepBar = na
+var float sStop = na
+var string sName = ""
+var bool sPoi = false
+var bool sMacro = false
+var float sVol = 0.0
+var bool sIfvg = false
+
+if bullName != ""
+    if not bPend
+        bPend := true
+        bSweepBar := bar_index
+        bStop := low
+        bName := bullName
+        bPoi := poiBull
+        bMacro := false
+        bVol := 0.0
+        bIfvg := false
+        label.new(bar_index, low, "$ " + bullName, style = label.style_label_up, color = color.new(bullCol, 100), textcolor = bullCol, size = size.small)
+    else
+        bPoi := bPoi or poiBull
+if bearName != ""
+    if not sPend
+        sPend := true
+        sSweepBar := bar_index
+        sStop := high
+        sName := bearName
+        sPoi := poiBear
+        sMacro := false
+        sVol := 0.0
+        sIfvg := false
+        label.new(bar_index, high, "$ " + bearName, style = label.style_label_down, color = color.new(bearCol, 100), textcolor = bearCol, size = size.small)
+    else
+        sPoi := sPoi or poiBear
+
+if bPend
+    bStop := math.min(bStop, low)
+    bMacro := bMacro or inMacro
+    bVol := math.max(bVol, volRatio)
+    bIfvg := bIfvg or bullIfvg
+    if bar_index - bSweepBar > setupBars
+        bPend := false
+if sPend
+    sStop := math.max(sStop, high)
+    sMacro := sMacro or inMacro
+    sVol := math.max(sVol, volRatio)
+    sIfvg := sIfvg or bearIfvg
+    if bar_index - sSweepBar > setupBars
+        sPend := false
+
+// Last scored setup (shown in the checklist table).
+var int lastDir = 0
+var bool k1 = false
+var bool k2 = false
+var bool k3 = false
+var bool k4 = false
+var bool k5 = false
+var bool k6 = false
+var bool k7 = false
+var bool k8 = false
+var float lastEntry = na
+var float lastStop = na
+var float lastTarget = na
+var float lastRR = na
+var int lastScore = 0
+var string lastName = ""
+var int lastTime = na
+
+bool bullAlert = false
+bool bearAlert = false
+
+// Bullish MSS: close above the last internal swing high after a sell-side sweep.
+if confirmed and bPend and not na(swingH) and close > swingH and close[1] <= swingH and swingH > bStop
+    float entry = close
+    float risk = entry - bStop
+    if risk > 0
+        float need = entry + minRR * risk
+        float tgt = f_bestTarget(irlHLvl, need, false)
+        tgt := f_pick(tgt, f_bestTarget(hBearBotA, need, false), need, false)
+        tgt := f_pick(tgt, pdh, need, false)
+        tgt := f_pick(tgt, lonHi, need, false)
+        tgt := f_pick(tgt, asiaHi, need, false)
+        tgt := f_pick(tgt, nyHi, need, false)
+        lastDir := 1
+        k1 := true
+        k2 := bPoi
+        k3 := true
+        k4 := bMacro or inMacro
+        k5 := entry <= rangeMid
+        k6 := bVol >= volMult
+        k7 := bIfvg
+        k8 := not na(tgt)
+        lastEntry := entry
+        lastStop := bStop
+        lastTarget := na(tgt) ? need : tgt
+        lastRR := (lastTarget - entry) / risk
+        lastScore := (k1 ? 1 : 0) + (k2 ? 1 : 0) + (k3 ? 1 : 0) + (k4 ? 1 : 0) + (k5 ? 1 : 0) + (k6 ? 1 : 0) + (k7 ? 1 : 0) + (k8 ? 1 : 0)
+        lastName := bName
+        lastTime := time
+        line.new(swingHBar, swingH, bar_index, swingH, color = bullCol, width = 1)
+        label.new(int(math.round((swingHBar + bar_index) / 2)), swingH, "MSS", style = label.style_label_down, color = color.new(bullCol, 100), textcolor = bullCol, size = size.small)
+        if showTrade
+            box.new(bar_index, lastTarget, bar_index + tradeBars, entry, border_color = color.new(bullCol, 60), bgcolor = color.new(bullCol, 85), text = "Target " + str.tostring(lastTarget, format.mintick) + (k8 ? "" : " (no clear liquidity)"), text_color = bullCol, text_size = size.tiny, text_valign = text.align_top)
+            box.new(bar_index, entry, bar_index + tradeBars, bStop, border_color = color.new(bearCol, 60), bgcolor = color.new(bearCol, 85), text = "Stop " + str.tostring(bStop, format.mintick), text_color = bearCol, text_size = size.tiny, text_valign = text.align_bottom)
+            label.new(bar_index + tradeBars, entry, "LONG · RR " + str.tostring(lastRR, "#.##") + " · " + str.tostring(lastScore) + "/8", style = label.style_label_left, color = color.new(bullCol, 20), textcolor = color.white, size = size.small)
+        bullAlert := lastScore >= minScore
+        if bullAlert
+            alert("TK ICT LONG " + syminfo.ticker + " · score " + str.tostring(lastScore) + "/8 · entry " + str.tostring(entry, format.mintick) + " · stop " + str.tostring(bStop, format.mintick) + " · target " + str.tostring(lastTarget, format.mintick), alert.freq_once_per_bar_close)
+    bPend := false
+
+// Bearish MSS: close below the last internal swing low after a buy-side sweep.
+if confirmed and sPend and not na(swingL) and close < swingL and close[1] >= swingL and swingL < sStop
+    float entry = close
+    float risk = sStop - entry
+    if risk > 0
+        float need = entry - minRR * risk
+        float tgt = f_bestTarget(irlLLvl, need, true)
+        tgt := f_pick(tgt, f_bestTarget(hBullTopA, need, true), need, true)
+        tgt := f_pick(tgt, pdl, need, true)
+        tgt := f_pick(tgt, lonLo, need, true)
+        tgt := f_pick(tgt, asiaLo, need, true)
+        tgt := f_pick(tgt, nyLo, need, true)
+        lastDir := -1
+        k1 := true
+        k2 := sPoi
+        k3 := true
+        k4 := sMacro or inMacro
+        k5 := entry >= rangeMid
+        k6 := sVol >= volMult
+        k7 := sIfvg
+        k8 := not na(tgt)
+        lastEntry := entry
+        lastStop := sStop
+        lastTarget := na(tgt) ? need : tgt
+        lastRR := (entry - lastTarget) / risk
+        lastScore := (k1 ? 1 : 0) + (k2 ? 1 : 0) + (k3 ? 1 : 0) + (k4 ? 1 : 0) + (k5 ? 1 : 0) + (k6 ? 1 : 0) + (k7 ? 1 : 0) + (k8 ? 1 : 0)
+        lastName := sName
+        lastTime := time
+        line.new(swingLBar, swingL, bar_index, swingL, color = bearCol, width = 1)
+        label.new(int(math.round((swingLBar + bar_index) / 2)), swingL, "MSS", style = label.style_label_up, color = color.new(bearCol, 100), textcolor = bearCol, size = size.small)
+        if showTrade
+            box.new(bar_index, entry, bar_index + tradeBars, lastTarget, border_color = color.new(bullCol, 60), bgcolor = color.new(bullCol, 85), text = "Target " + str.tostring(lastTarget, format.mintick) + (k8 ? "" : " (no clear liquidity)"), text_color = bullCol, text_size = size.tiny, text_valign = text.align_bottom)
+            box.new(bar_index, sStop, bar_index + tradeBars, entry, border_color = color.new(bearCol, 60), bgcolor = color.new(bearCol, 85), text = "Stop " + str.tostring(sStop, format.mintick), text_color = bearCol, text_size = size.tiny, text_valign = text.align_top)
+            label.new(bar_index + tradeBars, entry, "SHORT · RR " + str.tostring(lastRR, "#.##") + " · " + str.tostring(lastScore) + "/8", style = label.style_label_left, color = color.new(bearCol, 20), textcolor = color.white, size = size.small)
+        bearAlert := lastScore >= minScore
+        if bearAlert
+            alert("TK ICT SHORT " + syminfo.ticker + " · score " + str.tostring(lastScore) + "/8 · entry " + str.tostring(entry, format.mintick) + " · stop " + str.tostring(sStop, format.mintick) + " · target " + str.tostring(lastTarget, format.mintick), alert.freq_once_per_bar_close)
+    sPend := false
+
+// Structure broken: the swing is used up (a new one must form before the next MSS).
+if confirmed and not na(swingH) and close > swingH
+    swingH := na
+if confirmed and not na(swingL) and close < swingL
+    swingL := na
+
+alertcondition(bullAlert, "TK ICT long setup", "TK ICT: long setup with score ≥ threshold on {{ticker}} ({{interval}}) at {{close}}")
+alertcondition(bearAlert, "TK ICT short setup", "TK ICT: short setup with score ≥ threshold on {{ticker}} ({{interval}}) at {{close}}")
+
+// ═════════════════════════════ Tables ═════════════════════════════
+var table biasT = biasPos == "Hidden" ? na : table.new(f_pos(biasPos), 2, 5, border_color = color.new(levelCol, 60), border_width = 1)
+var table checkT = checkPos == "Hidden" ? na : table.new(f_pos(checkPos), 2, 11, border_color = color.new(levelCol, 60), border_width = 1)
+
+f_biasCell(table t, int row, string tf, int b) =>
+    color bg = b == 1 ? color.new(bullCol, 70) : b == -1 ? color.new(bearCol, 70) : color.new(levelCol, 80)
+    table.cell(t, 0, row, f_tfName(tf), text_color = chart.fg_color, text_size = size.small, bgcolor = color.new(levelCol, 90))
+    table.cell(t, 1, row, b == 1 ? "Bullish" : b == -1 ? "Bearish" : "Neutral", text_color = chart.fg_color, text_size = size.small, bgcolor = bg)
+
+if barstate.islast
+    if not na(biasT)
+        table.cell(biasT, 0, 0, "TF", text_color = chart.fg_color, text_size = size.small, bgcolor = color.new(levelCol, 75))
+        table.cell(biasT, 1, 0, "Bias", text_color = chart.fg_color, text_size = size.small, bgcolor = color.new(levelCol, 75))
+        f_biasCell(biasT, 1, tf1, b1)
+        f_biasCell(biasT, 2, tf2, b2)
+        f_biasCell(biasT, 3, tf3, b3)
+        f_biasCell(biasT, 4, tf4, b4)
+    if not na(checkT)
+        array<string> names = array.from("Liquidity Sweep", "HTF POI Delivery", "MSS Confirmed", "Macro Window", "Equilibrium", "Volume Influx", "IFVG", "Clear Targets")
+        array<bool> oks = array.from(k1, k2, k3, k4, k5, k6, k7, k8)
+        string head = lastDir == 1 ? "LONG setup" : lastDir == -1 ? "SHORT setup" : "No setup yet"
+        color headBg = lastDir == 1 ? color.new(bullCol, 60) : lastDir == -1 ? color.new(bearCol, 60) : color.new(levelCol, 75)
+        table.cell(checkT, 0, 0, "Setup Checklist", text_color = chart.fg_color, text_size = size.small, bgcolor = color.new(levelCol, 75))
+        table.cell(checkT, 1, 0, "Status", text_color = chart.fg_color, text_size = size.small, bgcolor = color.new(levelCol, 75))
+        for i = 0 to 7
+            table.cell(checkT, 0, i + 1, array.get(names, i), text_color = chart.fg_color, text_size = size.small, text_halign = text.align_left, bgcolor = color.new(levelCol, 92))
+            table.cell(checkT, 1, i + 1, lastDir == 0 ? "–" : f_mark(array.get(oks, i)), text_color = chart.fg_color, text_size = size.small, bgcolor = color.new(levelCol, 92))
+        table.cell(checkT, 0, 9, head + (lastDir == 0 ? "" : " · " + lastName), text_color = chart.fg_color, text_size = size.small, text_halign = text.align_left, bgcolor = headBg)
+        table.cell(checkT, 1, 9, lastDir == 0 ? "" : str.tostring(lastScore) + "/8", text_color = chart.fg_color, text_size = size.small, bgcolor = headBg)
+        string pend = bPend ? "Waiting for bullish MSS (" + bName + " swept)" : sPend ? "Waiting for bearish MSS (" + sName + " swept)" : ""
+        table.cell(checkT, 0, 10, lastDir == 0 ? pend : "RR " + str.tostring(lastRR, "#.##") + " · " + str.format_time(lastTime, "dd MMM HH:mm", TZ) + " NY" + (pend == "" ? "" : " · " + pend), text_color = chart.fg_color, text_size = size.tiny, text_halign = text.align_left, bgcolor = color.new(levelCol, 92))
+        table.merge_cells(checkT, 0, 10, 1, 10)
