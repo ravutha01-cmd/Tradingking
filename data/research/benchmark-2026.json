@@ -1,0 +1,157 @@
+{
+ "since2023": {
+  "record": {
+   "n": 6122,
+   "perDay": 6.221544715447155,
+   "winRate": 0.6363933355112709,
+   "avgR": 0.025367592994925317,
+   "returnPct": 46.65837447307697,
+   "maxDDPct": 6.487969750088518,
+   "positiveMonths": 32,
+   "months": 46
+  },
+  "random": {
+   "n": 500,
+   "p5": -60.66650781260642,
+   "p50": -47.812527260103465,
+   "p95": -29.874252435501504,
+   "best": -9.733319005926699,
+   "beatReturn": 1,
+   "beatRatio": 1,
+   "perDay": 6.1605691056910565
+  }
+ },
+ "generatedAt": "2026-10-08T05:09:28.578Z",
+ "from": 1767225600000,
+ "to": 1791435600000,
+ "days": 201,
+ "ranking": [
+  {
+   "name": "5-a-day walk-forward — return÷DD · last 2 yrs · min 0.05R",
+   "kind": "alt",
+   "perDay": 4.786069651741293,
+   "returnPct": 22.062694358851754,
+   "maxDDPct": 6.899379697502372,
+   "ratio": 3.19777941295775,
+   "note": "other selection method"
+  },
+  {
+   "name": "5-a-day walk-forward — return÷DD · all history · min 0.05R",
+   "kind": "alt",
+   "perDay": 4.313432835820896,
+   "returnPct": 17.62023845213836,
+   "maxDDPct": 6.409846330735758,
+   "ratio": 2.748933054392867,
+   "note": "other selection method"
+  },
+  {
+   "name": "5-a-day walk-forward — edge/trade · last 2 yrs · min 0.02R",
+   "kind": "alt",
+   "perDay": 3.945273631840796,
+   "returnPct": 16.7574570078459,
+   "maxDDPct": 7.724272641210805,
+   "ratio": 2.169454366284398,
+   "note": "other selection method"
+  },
+  {
+   "name": "5-a-day walk-forward — edge/trade · last 2 yrs · min 0.05R",
+   "kind": "alt",
+   "perDay": 3.945273631840796,
+   "returnPct": 16.7574570078459,
+   "maxDDPct": 7.724272641210805,
+   "ratio": 2.169454366284398,
+   "note": "other selection method"
+  },
+  {
+   "name": "5-a-day walk-forward (chosen) — return÷DD · all history · min 0.02R",
+   "kind": "chosen",
+   "perDay": 5.437810945273632,
+   "returnPct": 12.36801422360676,
+   "maxDDPct": 6.320690329372369,
+   "ratio": 1.9567505413344426,
+   "note": "live on the Signals page"
+  },
+  {
+   "name": "Trend portfolio (Research page)",
+   "kind": "alt",
+   "perDay": 2.388059701492537,
+   "returnPct": 4.347600826262954,
+   "maxDDPct": 2.657900261191637,
+   "ratio": 1.6357276041328055,
+   "note": "~1 signal/day"
+  },
+  {
+   "name": "5-a-day walk-forward — return÷DD · last 2 yrs · min 0.02R",
+   "kind": "alt",
+   "perDay": 5.378109452736318,
+   "returnPct": 8.102475242547369,
+   "maxDDPct": 5.219051778687856,
+   "ratio": 1.5524803328516597,
+   "note": "other selection method"
+  },
+  {
+   "name": "5-a-day walk-forward — edge/trade · all history · min 0.02R",
+   "kind": "alt",
+   "perDay": 3.4228855721393034,
+   "returnPct": 12.881555113687181,
+   "maxDDPct": 8.75031717636594,
+   "ratio": 1.472124364643542,
+   "note": "other selection method"
+  },
+  {
+   "name": "5-a-day walk-forward — edge/trade · all history · min 0.05R",
+   "kind": "alt",
+   "perDay": 3.4228855721393034,
+   "returnPct": 12.881555113687181,
+   "maxDDPct": 8.75031717636594,
+   "ratio": 1.472124364643542,
+   "note": "other selection method"
+  },
+  {
+   "name": "Random trader — median of 500 (5.5/day)",
+   "kind": "random",
+   "perDay": 5.487562189054726,
+   "returnPct": 6.168533895263373,
+   "maxDDPct": 7.47561931239038,
+   "ratio": 0.8251535608614268,
+   "note": "best of 500: 44.3%"
+  },
+  {
+   "name": "5-a-day single split (chosen on 2020–24)",
+   "kind": "alt",
+   "perDay": 5.432835820895522,
+   "returnPct": 0.7070258538304897,
+   "maxDDPct": 4.533603125961772,
+   "ratio": 0.15595230420185913,
+   "note": "earlier version"
+  },
+  {
+   "name": "Buy & hold gold",
+   "kind": "alt",
+   "perDay": 0,
+   "returnPct": -4.527784182614713,
+   "maxDDPct": 30.195226921211983,
+   "ratio": -0.14995032805777556,
+   "note": "full position"
+  },
+  {
+   "name": "CRT 4H (trained, CRT Lab)",
+   "kind": "alt",
+   "perDay": 0.04975124378109453,
+   "returnPct": -2.3926741908474325,
+   "maxDDPct": 2.9648570111073913,
+   "ratio": -0.807011664266991,
+   "note": "1% risk per trade"
+  }
+ ],
+ "random": {
+  "n": 500,
+  "p5": -8.923360948275949,
+  "p50": 6.168533895263373,
+  "p95": 22.84176504776221,
+  "best": 44.2743047844258,
+  "beatReturn": 0.742,
+  "beatRatio": 0.772,
+  "perDay": 5.487562189054726
+ }
+}

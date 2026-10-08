@@ -43,6 +43,19 @@
     </section>
 
     <section class="card span3">
+      <h2>Forward test · live record <small id="fwdUpdated"></small></h2>
+      <div class="tiles" id="fwdTiles"></div>
+      <div class="table-scroll history-wrap"><table class="history" id="fwd"></table></div>
+      <p class="hint">Recorded hourly by a GitHub Action (<code>.github/workflows/forward-test.yml</code>) since 8 Oct 2026: each signal is saved with the time it was first seen and its result when it closes, and committed to the repository — the commit history proves when each signal was published.</p>
+    </section>
+
+    <section class="card span3">
+      <h2>Is it the best option for 2026?</h2>
+      <div class="verdict" id="benchVerdict"></div>
+      <div class="table-scroll"><table class="history" id="bench"></table></div>
+    </section>
+
+    <section class="card span3">
       <h2>Walk-forward results <small>0.25% risk per trade</small></h2>
       <div class="table-scroll"><table class="history" id="years"></table></div>
       <h3>Growth of 100, out-of-sample 2023 → now <small>(rules re-chosen every January — dashed lines)</small></h3>
@@ -63,6 +76,8 @@
   <script src="js/history.js"></script>
   <script src="scripts/research/lib.js"></script>
   <script src="js/intraday-data.js"></script>
+  <script src="js/benchmark-data.js"></script>
+  <script src="js/forward-data.js"></script>
   <script src="js/signals5.js"></script>
 </body>
 </html>

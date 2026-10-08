@@ -118,6 +118,10 @@ Eight selection methods (ranking × lookback × minimum edge) were compared on t
 
 The 2026 rules (live on `signals.html`): 1H RSI(2) pullback with the 4H trend, 30m RSI(2) pullback with the 1H trend, 30m Bollinger reversion with the 4H trend, and Donchian breakouts on 15m, 30m, 1H (with the 4H trend, London/NY session) and 4H. Costs matter: 2023 → now is +76% at $0.20 per trade, +22% at $0.60, break-even ≈ $0.80. The rules often fire together, so combined risk can reach ~1%.
 
+**Is it the best for 2026?** (`scripts/research/benchmark-2026.js`) Over 2023 → now the walk-forward rules made +46.7% while 500 random traders with the same ~6 trades/day, stops, holding time and costs made a median of −47.8% (best of 500: −9.7%) — the rules beat all 500. In 2026 alone (Jan 1 → Oct 8) they made +12.4% vs a random-trader median of +6.2% (beats 74%), ahead of the earlier single-split 5-a-day (+0.7%), the trend portfolio (+4.3%), CRT 4H (−2.4%) and buy & hold (−4.5%, 30% drawdown). Four other walk-forward selection variants did better in 2026 (up to +22.1%); they were not chosen because the live method was picked on 2023–25 only.
+
+**Forward test.** `.github/workflows/forward-test.yml` runs `scripts/forward/log.js` every hour: each live signal since 8 Oct 2026 is saved to `data/forward/signals.json` with the time it was first seen, its result is filled in when it closes, and the change is committed — the commit history is a timestamped record. Disable the workflow in the repository's Actions tab to stop it.
+
 A simpler single split (`intraday.js`: chosen on 2020–24) gave +8.1% on 2025–26 but only +0.7% in 2026; an attempt using 5m/15m charts without the drawdown cap lost 46% on 2025–26.
 
 Regenerate (≈ 3 min download + 20 s):

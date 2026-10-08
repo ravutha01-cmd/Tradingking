@@ -1,0 +1,38 @@
+# Forward test of the 5-a-day XAUUSD signals: every hour, record new signals and
+# results in data/forward/signals.json and commit them. The commit history is a
+# timestamped record of each signal. Disable this workflow in the Actions tab to stop it.
+name: Forward test (5-a-day signals)
+
+on:
+  schedule:
+    - cron: "7 * * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: forward-test
+  cancel-in-progress: false
+
+jobs:
+  log:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Record signals
+        run: node scripts/forward/log.js
+      - name: Commit if changed
+        run: |
+          if git diff --quiet -- data/forward js/forward-data.js; then
+            echo "No new signals or results."
+            exit 0
+          fi
+          git config user.name "forward-test-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add data/forward js/forward-data.js
+          git commit -m "Forward test: $(node -e "const s=require('./data/forward/signals.json').summary;console.log(s.signals+' signals, '+s.closed+' closed, '+s.totalR+'R')")"
+          git push

@@ -53,6 +53,34 @@
     drawEquity();
   }
 
+  // ───────── 2026 comparison and forward test ─────────
+  function renderBench() {
+    const B = window.BENCH;
+    if (!B) return;
+    const R = B.random, L23 = B.since2023;
+    $('benchVerdict').className = 'verdict good';
+    $('benchVerdict').innerHTML = `<b>Beats chance over the long run.</b> From 2023 to now the walk-forward rules made ${pct(L23.record.returnPct)} while 500 random traders with the same frequency, stops and costs made a median of ${pct(L23.random.p50)} — the best of 500 made ${pct(L23.random.best)}, so the rules beat all of them.
+      2026 alone is a short, unusually kind year for random entries (median ${pct(R.p50)}); here the rules beat ${(R.beatReturn * 100).toFixed(0)}% of random traders.
+      Four other walk-forward variants did better in 2026, but nobody could have known that on 1 January — the live rules were chosen on 2023–25 results only.`;
+    $('bench').innerHTML = '<tr><th>#</th><th>Approach (Jan 1 → ' + new Date(B.to).toLocaleDateString() + ')</th><th>Signals/day</th><th>Return</th><th>Max DD</th><th>Return ÷ DD</th></tr>' +
+      B.ranking.map((r, i) => `<tr${r.kind === 'chosen' ? ' class="sel"' : ''}><td>${i + 1}</td><td>${r.name}${r.note ? ` <small>· ${r.note}</small>` : ''}</td><td>${r.perDay ? r.perDay.toFixed(1) : '—'}</td>
+        <td class="${cls(r.returnPct)}">${pct(r.returnPct)}</td><td>${r.maxDDPct.toFixed(1)}%</td><td class="${cls(r.ratio)}">${r.ratio.toFixed(2)}</td></tr>`).join('') +
+      `<tr><td colspan="6" class="mono">Random traders (500): 2026 5th–95th percentile ${pct(R.p5)} … ${pct(R.p95)}. 2023 → now: ${pct(L23.random.p5)} … ${pct(L23.random.p95)} vs the rules' ${pct(L23.record.returnPct)}.</td></tr>`;
+  }
+
+  function renderForward() {
+    const F = window.FORWARD;
+    if (!F) { $('fwd').innerHTML = '<tr><td>No forward-test data yet.</td></tr>'; return; }
+    const s = F.summary;
+    $('fwdUpdated').textContent = `since ${F.started.slice(0, 10)} · updated ${new Date(s.updated).toLocaleString()}`;
+    $('fwdTiles').innerHTML = [['Signals recorded', s.signals], ['Per day', s.perDay.toFixed(1)], ['Closed', s.closed], ['Win rate', s.winRate == null ? '—' : (s.winRate * 100).toFixed(0) + '%'],
+      ['Total', s.closed ? sR(s.totalR) : '—', cls(s.totalR)], ['Return (0.25%/trade)', s.closed ? pct(s.returnPct, 2) : '—', cls(s.returnPct)]]
+      .map(([k, v, c]) => `<div class="tile"><span>${k}</span><b class="${c || ''}">${v}</b></div>`).join('');
+    $('fwd').innerHTML = '<tr><th>Entered</th><th>First recorded</th><th>Rule</th><th>Side</th><th>Entry</th><th>Stop</th><th>Result</th></tr>' +
+      [...F.signals].reverse().map((x) => `<tr><td>${time(Date.parse(x.entryTime))}</td><td>${time(Date.parse(x.firstSeen))}</td><td>${x.rule}</td><td>${side(x.side === 'BUY' ? 1 : -1)}</td>
+        <td>${fmt(x.entry)}</td><td>${fmt(x.stop)}</td><td>${x.status === 'open' ? tag('open', 'neutral') : `${WHY[x.why] || x.why} <span class="${cls(x.r)}">${sR(x.r)}</span>`}</td></tr>`).join('');
+  }
+
   function drawEquity() {
     const el = $('equity'), a = D.curve;
     if (!a || !a.length) return;
@@ -184,6 +212,8 @@
     if (e.target.checked && 'Notification' in window && Notification.permission === 'default') Notification.requestPermission();
   });
   renderStatic();
+  renderBench();
+  renderForward();
   refresh();
   setInterval(refresh, 60000);
   let rt;
