@@ -15,6 +15,7 @@
   const filters = (p) => [p.htf && p.htf !== 'none' ? `only with the ${p.htf.toUpperCase()} trend` : 'no higher-timeframe filter',
     p.sess === 'ldnny' ? 'London + New York session only' : 'any session', p.eod ? 'closed by 4 PM NY' : 'may run overnight'].join(' · ');
   const exitRule = (l, dir) => (l.id === 'bbrev' ? `target: middle band · max ${l.params.maxBars} candles`
+    : l.id === 'donchian' ? `exit on a close beyond the ${l.params.m}-candle ${dir === 1 ? 'low' : 'high'}`
     : l.id === 'pullback' ? `exit when RSI(${l.params.len}) ${dir === -1 ? '< ' + (100 - l.params.exit) : '> ' + l.params.exit} · max ${l.params.maxBars} candles` : 'see rules');
   const WHY = { signal: 'exit rule', stop: 'stopped', target: 'target', time: 'time limit', eod: '4 PM close', 'session end': '4 PM close' };
 
@@ -28,20 +29,27 @@
 
   // ───────── Static: results, rules, chart ─────────
   function renderStatic() {
-    const t = D.test, y = D.ytd, tr = D.train;
+    const y = D.ytd, rec = D.record, Y = D.years;
     $('tiles').innerHTML = [
-      ['Signals / day (2025–26)', t.perDay.toFixed(1)], ['Win rate', (t.winRate * 100).toFixed(0) + '%'],
-      ['2025–26 return', pct(t.returnPct), cls(t.returnPct)], ['Max drawdown', t.maxDDPct.toFixed(1) + '%'],
-      ['2026 so far', pct(y.returnPct), cls(y.returnPct)], ['Positive months', `${t.positiveMonths}/${t.months}`],
+      ['Signals / day (2026)', y.perDay.toFixed(1)], ['Win rate (2026)', (y.winRate * 100).toFixed(0) + '%'],
+      ['2026 return', pct(y.returnPct), cls(y.returnPct)], ['2026 max drawdown', y.maxDDPct.toFixed(1) + '%'],
+      ['2023 → now (out-of-sample)', pct(rec.returnPct), cls(rec.returnPct)], ['Positive months', `${rec.positiveMonths}/${rec.months}`],
     ].map(([k, v, c]) => `<div class="tile"><span>${k}</span><b class="${c || ''}">${v}</b></div>`).join('');
-    $('verdict').className = 'verdict ' + (t.returnPct > 0 ? 'warn' : 'bad');
-    $('verdict').innerHTML = `<b>Small but positive edge.</b> Chosen on 2020–24 (${pct(tr.returnPct, 0)}, ${tr.perDay.toFixed(1)} signals/day), it stayed profitable on unseen 2025–26 data (${pct(t.returnPct)} at ${D.riskPct}% risk per trade) but is flat in 2026 (${pct(y.returnPct)}).
-      Average ${sR(t.avgR)} per trade after $${D.cost} costs — a high win rate (${(t.winRate * 100).toFixed(0)}%) with losses about twice the size of wins. Your broker's spread decides whether it pays.`;
-    $('costs').innerHTML = '<tr><th>Cost per trade</th><th>Avg per trade</th><th>2025–26 return</th></tr>' +
+    $('verdict').className = 'verdict ' + (y.returnPct > 0 ? 'good' : 'bad');
+    $('verdict').innerHTML = `<b>Walk-forward tested.</b> Every January the rules are re-chosen using only earlier data, then traded for the year. The 2026 rules were chosen on Aug 2020 – Dec 2025 and made ${pct(y.returnPct)} in 2026 (${y.perDay.toFixed(1)} signals/day, ${D.riskPct}% risk per trade); every year 2023–2026 was positive.
+      The edge per trade is small (${sR(y.avgR)} in 2026 after $${D.cost} costs), so a low-spread broker matters.`;
+    $('years').innerHTML = '<tr><th>Year</th><th>Rules chosen on</th><th>Signals/day</th><th>Win rate</th><th>Return</th><th>Max DD</th><th>Positive months</th></tr>' +
+      Object.entries(Y).map(([yr, v]) => `<tr${yr === '2026' ? ' class="sel"' : ''}><td><b>${yr}</b></td><td>Aug 2020 – Dec ${yr - 1}</td><td>${v.perDay.toFixed(1)}</td><td>${(v.winRate * 100).toFixed(0)}%</td>
+        <td class="${cls(v.returnPct)}">${pct(v.returnPct)}</td><td>${v.maxDDPct.toFixed(1)}%</td><td>${v.positiveMonths}/${v.months}</td></tr>`).join('');
+    $('methods').innerHTML = '<tr><th>Selection method</th><th>2023</th><th>2024</th><th>2025</th><th>2023–25</th><th>Max DD</th><th>Signals/day</th></tr>' +
+      D.methods.map((m) => `<tr${m.name === D.chosenMethod ? ' class="sel"' : ''}><td class="mono">${m.name}</td>${[2023, 2024, 2025].map((yr) => `<td class="${cls(m.years[yr].returnPct)}">${pct(m.years[yr].returnPct)}</td>`).join('')}
+        <td class="${cls(m.oos.returnPct)}">${pct(m.oos.returnPct)}</td><td>${m.oos.maxDDPct.toFixed(1)}%</td><td>${m.oos.perDay.toFixed(1)}</td></tr>`).join('') +
+      '<tr><td colspan="7" class="mono">The highlighted method was picked on 2023–25 only (best return ÷ drawdown with 4–7 signals/day); 2026 was not used to choose it.</td></tr>';
+    $('costs').innerHTML = '<tr><th>Cost per trade</th><th>Avg per trade</th><th>2023 → now</th></tr>' +
       D.costCurve.map((c) => `<tr${c.cost === D.cost ? ' class="sel"' : ''}><td>$${c.cost.toFixed(2)}</td><td class="${cls(c.avgR)}">${c.avgR >= 0 ? '+' : ''}${c.avgR.toFixed(3)}R</td><td class="${cls(c.returnPct)}">${pct(c.returnPct)}</td></tr>`).join('');
-    $('legs').innerHTML = '<tr><th>Rule</th><th>How it trades</th><th>Signals/day</th><th>Train avg</th><th>2025–26 avg</th><th>2026 avg</th></tr>' +
-      D.legs.map((l) => `<tr><td><b>${legName(l)}</b></td><td class="mono">${l.rules.replace(/ \(mirror[^)]*\)|, sell a close above the upper band/g, '')} Both directions. ${filters(l.params)}.</td>
-        <td>${l.test.perDay.toFixed(2)}</td><td class="${cls(l.train.avgR)}">${sR(l.train.avgR)}</td><td class="${cls(l.test.avgR)}">${sR(l.test.avgR)}</td><td class="${cls(l.ytd.avgR)}">${sR(l.ytd.avgR)}</td></tr>`).join('');
+    $('legs').innerHTML = '<tr><th>Rule</th><th>How it trades</th><th>Signals/day (2026)</th><th>Avg on 2020–25</th><th>Avg in 2026</th></tr>' +
+      D.legs.map((l) => `<tr><td><b>${legName(l)}</b></td><td class="mono">${l.rules.replace(/ \(mirror[^)]*\)|, sell a close above the upper band| \(sell a close below the [^)]*\)/g, '')} Both directions. ${filters(l.params)}.</td>
+        <td>${l.ytd.perDay.toFixed(2)}</td><td class="${cls(l.train.avgR)}">${sR(l.train.avgR)}</td><td class="${cls(l.ytd.avgR)}">${sR(l.ytd.avgR)}</td></tr>`).join('');
     drawEquity();
   }
 
@@ -58,10 +66,11 @@
     for (let v = Math.ceil(y0 / step) * step; v <= y1; v += step) grid += `<line x1="${m.l}" x2="${W - m.r}" y1="${Y(v)}" y2="${Y(v)}" class="${v === 100 ? 'zero' : 'grid'}"/><text x="${m.l - 6}" y="${Y(v) + 4}" text-anchor="end">${v}</text>`;
     let xl = '';
     for (let yr = new Date(t0).getUTCFullYear() + 1; yr <= new Date(t1).getUTCFullYear(); yr++) xl += `<text x="${X(Date.UTC(yr, 0, 1))}" y="${H - 8}" text-anchor="middle">${yr}</text>`;
-    const ts = D.testStart;
+    let years = '';
+    for (let yr = new Date(t0).getUTCFullYear() + 1; yr <= new Date(t1).getUTCFullYear(); yr++) years += `<line x1="${X(Date.UTC(yr, 0, 1))}" x2="${X(Date.UTC(yr, 0, 1))}" y1="${m.t}" y2="${H - m.b}" class="split"/>`;
     const path = a.map((p, i) => `${i ? 'L' : 'M'}${X(p[0]).toFixed(1)},${Y(p[1]).toFixed(1)}`).join('');
     el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" width="100%" height="${H}" role="img" aria-label="Growth of 100">
-      ${grid}${xl}<line x1="${X(ts)}" x2="${X(ts)}" y1="${m.t}" y2="${H - m.b}" class="split"/><text x="${X(ts) + 6}" y="${m.t + 10}" class="split-label">unseen →</text>
+      ${grid}${xl}${years}
       <path d="${path}" class="s1"/><line class="cross" y1="${m.t}" y2="${H - m.b}" visibility="hidden"/><circle class="dot" r="4" visibility="hidden" style="fill:#c08a1e"/>
       <rect x="${m.l}" y="${m.t}" width="${W - m.l - m.r}" height="${H - m.t - m.b}" fill="transparent"/></svg><div class="tip" hidden></div>`;
     const svg = el.querySelector('svg'), tip = el.querySelector('.tip'), cross = svg.querySelector('.cross'), dot = svg.querySelector('.dot');
@@ -87,10 +96,10 @@
   async function refresh() {
     try {
       const now = Date.now();
-      const [m30, h1raw] = await Promise.all([History.fetchRange('30m', now - 3000 * 1800e3), History.fetchRange('1h', now - 3000 * 3600e3)]);
-      const forming = m30.at(-1);
+      const [m15, m30, h1raw] = await Promise.all([History.fetchRange('15m', now - 3000 * 900e3), History.fetchRange('30m', now - 3000 * 1800e3), History.fetchRange('1h', now - 3000 * 3600e3)]);
+      const forming = m15.at(-1);
       const h1 = Research.build(toRows(h1raw), 60), h4 = Research.build(toRows(h1raw), 240);
-      const frames = { 30: Research.build(toRows(m30), 30), 60: h1 };
+      const frames = { 15: Research.build(toRows(m15), 15), 30: Research.build(toRows(m30), 30), 60: h1, 240: h4 };
       for (const [tf, c] of Object.entries(frames)) c.htf = { h1: Research.htfTrend(c, +tf, h1, 60), h4: Research.htfTrend(c, +tf, h4, 240) };
 
       const today = Sessions.dayKey(now);
@@ -104,7 +113,7 @@
         // A signal on the last closed candle: enter at the open of the candle forming now.
         const sig = !isOpen && Research.entrySignal(c, strat, l.params, strat.prepare(c, l.params), c.length - 1);
         if (sig) {
-          const entry = l.tf === 30 && forming && !forming.closed ? forming.open : c.at(-1).close;
+          const entry = forming && !forming.closed ? forming.close : c.at(-1).close;
           const p = { l, dir: sig.dir, entry, stop: sig.stop, target: sig.target, time: c.at(-1).time + l.tf * 60e3, pending: true };
           todays.push(p); fresh.push(p);
         }
