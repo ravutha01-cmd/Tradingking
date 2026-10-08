@@ -23,16 +23,21 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      - name: Record signals
-        run: node scripts/forward/log.js
-      - name: Commit if changed
+      - name: Record signals and commit
+        # Retry against the latest branch head: other jobs (the monthly re-selection,
+        # or a developer push) may have committed in the meantime.
         run: |
-          if git diff --quiet -- data/forward js/forward-data.js; then
-            echo "No new signals or results."
-            exit 0
-          fi
           git config user.name "forward-test-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-          git add data/forward js/forward-data.js
-          git commit -m "Forward test: $(node -e "const s=require('./data/forward/signals.json').summary;console.log(s.signals+' signals, '+s.closed+' closed, '+s.totalR+'R')")"
-          git push
+          for attempt in 1 2 3; do
+            git fetch -q origin "$GITHUB_REF_NAME"
+            git reset -q --hard "origin/$GITHUB_REF_NAME"
+            node scripts/forward/log.js
+            if git diff --quiet -- data/forward js/forward-data.js; then echo "No changes."; exit 0; fi
+            git add data/forward js/forward-data.js
+            git commit -q -m "Forward test: $(node -e "const s=require('./data/forward/signals.json').summary;console.log(s.signals+' signals, '+s.closed+' closed, '+s.totalR+'R')")"
+            if git push -q origin "HEAD:$GITHUB_REF_NAME"; then exit 0; fi
+            echo "Push rejected (branch moved); retrying ($attempt)…"
+            sleep $((attempt * 10))
+          done
+          exit 1
