@@ -66,6 +66,8 @@ function backtest(c, strat, p, opts = {}) {
       if (pos) {
         const why = strat.exit(ctx, i, pos);
         if (why) pos.exitNext = why;
+        // Day trading: flat at the 4 PM NY close (exit at the open of the 16:00 candle).
+        else if (p.eod && c[i + 1] && c[i + 1].nyHour === 16 && c[i].nyHour !== 16) pos.exitNext = 'eod';
         else if (p.maxBars && i - pos.idx + 1 >= p.maxBars) pos.exitNext = 'time';
         else if (strat.trail) {
           const s = strat.trail(ctx, i, pos);
@@ -74,7 +76,7 @@ function backtest(c, strat, p, opts = {}) {
       }
     }
     if (!pos && i < to) {
-      const sig = strat.entry(ctx, i);
+      const sig = entrySignal(c, strat, p, ctx, i);
       if (sig) {
         const entry = c[i + 1].open;
         const risk = (entry - sig.stop) * sig.dir;
@@ -87,6 +89,17 @@ function backtest(c, strat, p, opts = {}) {
   }
   if (pos) close(to, c[to].close, 'end');
   return trades;
+}
+
+/* Entry signal at the close of bar i, after the optional gates: session (London + New
+ * York, 2 AM – noon NY), no new day trades in the last hour before the 4 PM NY close,
+ * and the higher-timeframe trend direction (c.htf[name][i]). */
+function entrySignal(c, strat, p, ctx, i) {
+  const h = c[i].nyHour;
+  if ((p.sess === 'ldnny' && !(h >= 2 && h < 12)) || (p.eod && h === 15)) return null;
+  const sig = strat.entry(ctx, i);
+  if (sig && p.htf && p.htf !== 'none' && (!c.htf || c.htf[p.htf][i] !== sig.dir)) return null;
+  return sig;
 }
 
 function stats(trades, years) {
@@ -232,7 +245,24 @@ function combos(grid, valid) {
   return valid ? out.filter(valid) : out;
 }
 
-const api = { MIN, HOUR, DAY, build, backtest, stats, STRATS, combos };
+/* Higher-timeframe trend for each lower-timeframe candle, using only HTF candles that
+ * have closed by the end of that candle: 1 when close > EMA50 > EMA200, -1 when
+ * close < EMA50 < EMA200, else 0. */
+function htfTrend(c, tfMin, h, htfMin) {
+  const cl = h.map((x) => x.close);
+  const e50 = I.ema(cl, 50), e200 = I.ema(cl, 200);
+  const dir = h.map((x, k) => (e200[k] == null ? 0 : x.close > e50[k] && e50[k] > e200[k] ? 1 : x.close < e50[k] && e50[k] < e200[k] ? -1 : 0));
+  const out = new Int8Array(c.length);
+  let k = -1;
+  for (let i = 0; i < c.length; i++) {
+    const end = c[i].time + tfMin * MIN;
+    while (k + 1 < h.length && h[k + 1].time + htfMin * MIN <= end) k++;
+    out[i] = k >= 0 ? dir[k] : 0;
+  }
+  return out;
+}
+
+const api = { MIN, HOUR, DAY, build, backtest, entrySignal, stats, STRATS, combos, htfTrend };
 if (node) module.exports = api;
 else root.Research = api;
 })(typeof window !== 'undefined' ? window : globalThis);

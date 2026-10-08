@@ -43,3 +43,12 @@ test('build makes NY-aligned 4H candles and skips the weekend', () => {
   const c4 = L.build(rows, 240);
   assert.deepStrictEqual(c4.map((c) => c.nyHour), [5, 9, 13]); // Friday 8 AM (partial), 9 AM, 1 PM; then closed
 });
+
+test('higher-timeframe trend uses only HTF candles that have closed', () => {
+  // A steadily rising 1H series: close > EMA50 > EMA200 once there is enough history.
+  const H = Array.from({ length: 260 }, (_, k) => ({ time: k * 3600e3, close: 100 + k }));
+  // A 15m candle ending exactly when HTF candle 249 closes sees the uptrend…
+  assert.strictEqual(L.htfTrend([{ time: 250 * 3600e3 - 15 * 60e3 }], 15, H, 60)[0], 1);
+  // …but early candles, before 200 HTF candles exist, get no trend.
+  assert.strictEqual(L.htfTrend([{ time: 10 * 3600e3 }], 15, H, 60)[0], 0);
+});

@@ -18,6 +18,7 @@ A static web app that shows **live XAUUSD (gold) trading signals**: it streams l
 - **Signal history**: new BUY/SELL signals are logged on candle close (saved in the browser).
 - **Alerts**: optional sound and desktop notification when a new signal appears.
 - Timeframes: 1m, 5m, 15m, 1H, 4H, 1D.
+- **5-a-Day Signals** (`signals.html`): about 5 live XAUUSD signals per day from three tested rules (30m Bollinger reversion with the 4H trend, 1H RSI(2) pullback, 30m RSI(2) pullback with the 1H trend), with open positions, today's signals, combined risk, sound/desktop alerts, results and cost sensitivity. See [5 signals a day](#5-signals-a-day).
 - **Research** (`research.html`): live analysis on every timeframe (15m → weekly), the best-tested strategy for 2026 with live status, every strategy × timeframe result, and CPI / PPI / NFP / FOMC news behaviour with an upcoming-release calendar. See [Research](#research-xauusd-2026).
 - **TradingView indicator** (`tradingview/`): ICT Setup Checklist — bias table, sessions, liquidity sweeps, MSS, IRL, FVG/IFVG, 8-point checklist, entry/stop/target and alerts. See [tradingview/README.md](tradingview/README.md).
 - **CRT 4H Lab** (`crt.html`): Candle Range Theory strategy with recorded history, backtest, training and a live signal journal (see below).
@@ -101,11 +102,24 @@ TradingView widgets cannot hand their price data to other scripts, so the signal
 - Trend-following worked in 2025–26 because gold trended hard (to ~$5,630 in Jan 2026); mean reversion broke down. The drawdown cap that excludes the failed first pick was added after seeing that failure — treat the portfolio's test result with some caution.
 - **News:** the first 5 minutes after CPI, NFP and FOMC are ~4× wider than normal (PPI 2×); typical 4-hour moves in 2026 are $14 (CPI), $21 (PPI), $34 (NFP), $80 (FOMC). The direction of the first 15 minutes continues only 44–57% of the time — a coin flip. The best tested rule (trade the first break of the 30-min pre-release range) made +0.12R per trade in training and +0.25R over 74 releases in 2025–26, but was negative for CPI and FOMC alone. Forecast-vs-actual ("surprise") data is not included.
 
+### 5 signals a day
+
+`scripts/research/intraday.js` searched 1,856 rule settings on 15m, 30m, 1H and 4H charts (five families × higher-timeframe trend filter × London/NY session filter × day-trade vs overnight). 192 passed the training bar (profitable in 3 of 4 slices of 2020–24, > 0.02R per trade after $0.40 costs, drawdown ≤ 25%). The best-ranked rule of each chart/family was added until the training frequency reached 5 per day:
+
+| 0.25% risk per trade | Signals/day | Win rate | Return | Max DD | Positive months |
+|---|---|---|---|---|---|
+| Training 2020–24 | 5.4 | 67% | +76% | 5.8% | 42/52 |
+| **Unseen 2025–26** | **5.4** | 65% | **+8.1%** | 6.5% | 16/22 |
+| 2026 so far | 5.4 | 64% | +0.7% | 4.5% | 7/10 |
+
+The edge is small (+0.013R per trade on 2025–26) and depends on costs: +13% at $0.20 per trade, +3.5% at $0.60, break-even ≈ $0.75. The rules often fire together in the same direction, so combined risk can be 0.75%. An earlier 5/day attempt on 5m/15m charts only (no drawdown cap) passed training with Bollinger mean reversion and lost 46% on 2025–26 — the drawdown cap and slower charts are what made the difference.
+
 Regenerate (≈ 3 min download + 20 s):
 
 ```bash
 NODE_USE_ENV_PROXY=1 node scripts/research/fetch-5m.js   # 5m candles → data/cache (not committed)
 node scripts/research/run.js                             # → data/research/report.json, js/research-data.js
+node scripts/research/intraday.js                        # → data/research/intraday.json, js/intraday-data.js (5 signals/day)
 ```
 
 ## Run it
@@ -143,6 +157,8 @@ js/sessions.js      New York time, sessions, NY-aligned 4H candles
 js/history.js       1H candle recorder (Binance, saved in the browser)
 js/crt-lab.js       CRT Lab UI
 js/crt-trained.js   built-in trained CRT settings (generated)
+js/signals5.js      5-a-Day Signals page (live signals from the three rules)
+js/intraday-data.js 5/day results (generated)
 js/research.js      Research page UI (live multi-timeframe analysis, strategy status, news)
 js/research-data.js research results (generated)
 scripts/research/   5m download, strategy backtester, news event study

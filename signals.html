@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TradingKing · 5-a-Day Signals</title>
+  <meta name="description" content="About 5 XAUUSD trade signals per day from three tested rules, computed live." />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">👑 TradingKing <span>5-a-Day Signals</span></div>
+    <nav class="nav"><a href="index.html">Dashboard</a><a href="signals.html" class="active">Signals</a><a href="crt.html">CRT 4H Lab</a><a href="research.html">Research</a></nav>
+    <div class="ticker">
+      <span class="price" id="price">—</span>
+      <span class="status" id="status"><i></i><b>loading</b></span>
+    </div>
+  </header>
+
+  <main class="lab">
+    <section class="card span2" id="nowCard">
+      <h2>Signals now <small id="updated"></small></h2>
+      <div id="newSignal"></div>
+      <h3>Open positions</h3>
+      <div class="table-scroll"><table class="history" id="open"><tr><td>Loading live data…</td></tr></table></div>
+      <h3>Today's signals <small id="dayLabel"></small></h3>
+      <div class="table-scroll"><table class="history" id="today"></table></div>
+      <div class="buttons"><label class="check"><input type="checkbox" id="alerts" /> Sound + desktop alert on new signals</label></div>
+    </section>
+
+    <section class="card">
+      <h2>How good is it?</h2>
+      <div class="tiles" id="tiles"></div>
+      <div class="verdict" id="verdict"></div>
+      <h3>If your costs are different (2025–26)</h3>
+      <table class="history" id="costs"></table>
+    </section>
+
+    <section class="card span3">
+      <h2>The three rules</h2>
+      <div class="table-scroll"><table class="history" id="legs"></table></div>
+      <p class="hint">Charts: Binance PAXG/USDT (tracks XAU/USD), weekends removed. Higher-timeframe trend: 1H or 4H close above EMA50 above EMA200 = up (below = down); signals against it are skipped. Orders: enter at the open of the next candle; the stop is fixed at entry (3× ATR(14) of the chart); exits happen at the next candle's open after the exit condition.</p>
+    </section>
+
+    <section class="card span3">
+      <h2>Growth of 100 · training 2020–24, then unseen 2025–26 <small>0.25% risk per trade</small></h2>
+      <div class="chart" id="equity"></div>
+      <h3>Last 7 days of signals</h3>
+      <div class="table-scroll history-wrap"><table class="history" id="recent"></table></div>
+    </section>
+  </main>
+
+  <footer>
+    Signals come from rules chosen on 2020–2024 data and checked on 2025–2026. The edge is small (≈ +0.01R per trade after $0.40 costs) and vanishes above ≈ $0.75 cost per trade.
+    Past results do not guarantee future results. Educational use only — not financial advice. Regenerate: <code>node scripts/research/intraday.js</code>
+  </footer>
+
+  <script src="js/indicators.js"></script>
+  <script src="js/sessions.js"></script>
+  <script src="js/history.js"></script>
+  <script src="scripts/research/lib.js"></script>
+  <script src="js/intraday-data.js"></script>
+  <script src="js/signals5.js"></script>
+</body>
+</html>
