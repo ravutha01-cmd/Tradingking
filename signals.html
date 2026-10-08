@@ -37,7 +37,7 @@
     </section>
 
     <section class="card span3">
-      <h2>The 2026 rules <small>chosen on Aug 2020 – Dec 2025</small></h2>
+      <h2>Current rules <small>re-chosen on the 1st of every month</small></h2>
       <div class="table-scroll"><table class="history" id="legs"></table></div>
       <p class="hint">Charts: Binance PAXG/USDT (tracks XAU/USD), weekends removed. Higher-timeframe trend: 1H or 4H close above EMA50 above EMA200 = up (below = down); signals against it are skipped. Orders: enter at the open of the next candle; the stop is fixed at entry (2–3× ATR(14) of that chart, shown in each rule); exits happen at the next candle's open after the exit condition.</p>
     </section>
@@ -58,7 +58,7 @@
     <section class="card span3">
       <h2>Walk-forward results <small>0.25% risk per trade</small></h2>
       <div class="table-scroll"><table class="history" id="years"></table></div>
-      <h3>Growth of 100, out-of-sample 2023 → now <small>(rules re-chosen every January — dashed lines)</small></h3>
+      <h3>Growth of 100, out-of-sample 2023 → now <small>(rules re-chosen monthly; dashed lines = years)</small></h3>
       <div class="chart" id="equity"></div>
       <details><summary>How the selection method was chosen</summary><div class="table-scroll"><table class="history" id="methods"></table></div></details>
       <h3>Last 7 days of signals</h3>
@@ -67,8 +67,8 @@
   </main>
 
   <footer>
-    Signals come from rules re-chosen each January on earlier data only (walk-forward). The edge per trade is small and shrinks quickly with higher spreads (break-even ≈ $0.80 per trade).
-    Past results do not guarantee future results. Educational use only — not financial advice. Regenerate: <code>node scripts/research/walkforward.js</code>
+    Signals come from rules re-chosen every month on earlier data only (walk-forward). Higher spreads reduce the edge — see the cost table.
+    Past results do not guarantee future results. Educational use only — not financial advice. Regenerate: <code>node scripts/research/adaptive.js</code> (runs automatically on the 1st of each month)
   </footer>
 
   <script src="js/indicators.js"></script>

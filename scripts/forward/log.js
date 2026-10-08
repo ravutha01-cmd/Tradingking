@@ -15,11 +15,24 @@ const file = path.join(root, 'data/forward/signals.json');
 const src = fs.readFileSync(path.join(root, 'js/intraday-data.js'), 'utf8');
 const D = JSON.parse(src.slice(src.indexOf('{'), src.lastIndexOf('}') + 1));
 const tfName = (tf) => (tf === 60 ? '1H' : tf === 240 ? '4H' : tf + 'm');
+// A rule is identified by its chart, family and exact settings.
+const ruleKey = (l) => `${l.tf}-${l.id}-${Buffer.from(JSON.stringify(l.params)).toString('base64url').slice(0, 24)}`;
 const toRows = (a) => a.filter((c) => c.closed).map((c) => [c.time, c.open, c.high, c.low, c.close]);
 
 (async () => {
   const now = Date.now();
-  const log = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : { started: new Date(FORWARD_START).toISOString(), riskPct: D.riskPct, cost: D.cost, rules: D.legs.map((l) => `${tfName(l.tf)} ${l.label}`), signals: [] };
+  const log = fs.existsSync(file) ? JSON.parse(fs.readFileSync(file, 'utf8')) : { started: new Date(FORWARD_START).toISOString(), riskPct: D.riskPct, cost: D.cost, signals: [] };
+  // Registry of every rule ever used. The monthly re-selection retires some rules; their
+  // open signals keep being tracked until they close, but they record no new signals.
+  // New rules only record signals entered after they went live (no back-filling).
+  log.registry = log.registry || {};
+  for (const r of Object.values(log.registry)) r.active = false;
+  for (const l of D.legs) {
+    const k = ruleKey(l);
+    if (!log.registry[k]) log.registry[k] = { tf: l.tf, id: l.id, label: l.label, params: l.params, since: new Date(now).toISOString() };
+    log.registry[k].active = true;
+  }
+  log.rules = Object.values(log.registry).filter((r) => r.active).map((r) => `${tfName(r.tf)} ${r.label}`);
   const [m15, m30, h1raw] = await Promise.all([
     History.fetchRange('15m', now - 3000 * 900e3), History.fetchRange('30m', now - 3000 * 1800e3), History.fetchRange('1h', now - 3000 * 3600e3),
   ]);
@@ -29,14 +42,17 @@ const toRows = (a) => a.filter((c) => c.closed).map((c) => [c.time, c.open, c.hi
 
   const byKey = new Map(log.signals.map((s) => [s.key, s]));
   let added = 0, closed = 0;
-  for (const l of D.legs) {
+  for (const [rk, l] of Object.entries(log.registry)) {
     const rule = `${tfName(l.tf)} ${l.label}`;
+    const since = Math.max(FORWARD_START, Date.parse(l.since));
+    if (!l.active && !log.signals.some((x) => x.rule_key === rk && x.status === 'open')) continue;
     for (const t of L.backtest(frames[l.tf], L.STRATS[l.id], l.params, { cost: D.cost })) {
       if (t.entryTime < FORWARD_START) continue;
-      const key = `${l.tf}-${l.id}-${t.entryTime}-${t.dir}`;
+      const key = `${rk}-${t.entryTime}-${t.dir}`;
       let s = byKey.get(key);
       if (!s) {
-        s = { key, rule, side: t.dir === 1 ? 'BUY' : 'SELL', entryTime: new Date(t.entryTime).toISOString(), firstSeen: new Date(now).toISOString(), entry: +t.entry.toFixed(2), stop: +t.stop.toFixed(2), target: t.target != null ? +t.target.toFixed(2) : null, status: 'open' };
+        if (!l.active || t.entryTime < since) continue; // only live rules, only after going live
+        s = { key, rule_key: rk, rule, side: t.dir === 1 ? 'BUY' : 'SELL', entryTime: new Date(t.entryTime).toISOString(), firstSeen: new Date(now).toISOString(), entry: +t.entry.toFixed(2), stop: +t.stop.toFixed(2), target: t.target != null ? +t.target.toFixed(2) : null, status: 'open' };
         byKey.set(key, s); log.signals.push(s); added++;
       }
       if (s.status === 'open' && t.why !== 'end') {

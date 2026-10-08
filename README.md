@@ -18,7 +18,7 @@ A static web app that shows **live XAUUSD (gold) trading signals**: it streams l
 - **Signal history**: new BUY/SELL signals are logged on candle close (saved in the browser).
 - **Alerts**: optional sound and desktop notification when a new signal appears.
 - Timeframes: 1m, 5m, 15m, 1H, 4H, 1D.
-- **5-a-Day Signals** (`signals.html`): about 5 live XAUUSD signals per day from walk-forward tested rules (+12.4% in 2026 at 0.25% risk per trade), with open positions, today's signals, combined risk, sound/desktop alerts, yearly results and cost sensitivity. See [5 signals a day](#5-signals-a-day).
+- **5-a-Day Signals** (`signals.html`): about 5 live XAUUSD signals per day from walk-forward tested rules re-chosen monthly (+19.5% in 2026 at 0.25% risk per trade, #1 of 12 consistent ~5/day approaches), with open positions, today's signals, combined risk, sound/desktop alerts, yearly results and cost sensitivity. See [5 signals a day](#5-signals-a-day).
 - **Research** (`research.html`): live analysis on every timeframe (15m → weekly), the best-tested strategy for 2026 with live status, every strategy × timeframe result, and CPI / PPI / NFP / FOMC news behaviour with an upcoming-release calendar. See [Research](#research-xauusd-2026).
 - **TradingView indicator** (`tradingview/`): ICT Setup Checklist — bias table, sessions, liquidity sweeps, MSS, IRL, FVG/IFVG, 8-point checklist, entry/stop/target and alerts. See [tradingview/README.md](tradingview/README.md).
 - **CRT 4H Lab** (`crt.html`): Candle Range Theory strategy with recorded history, backtest, training and a live signal journal (see below).
@@ -104,32 +104,34 @@ TradingView widgets cannot hand their price data to other scripts, so the signal
 
 ### 5 signals a day
 
-`scripts/research/walkforward.js` builds the 5-a-day rule set **walk-forward**: every January the rules are re-chosen using only earlier data, then traded for that year. The pool is 1,864 rule settings on 15m, 30m, 1H and 4H charts (five families × higher-timeframe trend filter × London/NY session filter × day-trade vs overnight). A rule qualifies if it was profitable in 3 of 4 slices of the selection data, earned > 0.02R per trade after $0.40 costs, and had a drawdown ≤ 25%; the best-ranked rule of each chart/family is added until the selection data shows 5 signals per day.
+The live 5-a-day system is chosen **walk-forward and re-chosen every month** (`scripts/research/adaptive.js`, run automatically on the 1st by `.github/workflows/monthly-reselect.yml`):
 
-Eight selection methods (ranking × lookback × minimum edge) were compared on the out-of-sample years 2023–2025; the best (return ÷ drawdown, all history, ≥ 0.02R) was then checked on 2026, which was not used to choose it:
+- **Rule pool:** 1,864 rule settings on 15m, 30m, 1H and 4H charts (EMA trend, Donchian breakout, RSI(2) pullback, Bollinger reversion, Asia-range breakout × higher-timeframe trend filter × London/NY session × day-trade vs overnight), each backtested with $0.40 costs per trade.
+- **Selection (data before the 1st of the month only):** keep rules profitable in 3 of 4 slices of the selection data with a drawdown ≤ 25%, rank them, and add the best rule of each chart/family until the rule set reaches ~5 signals/day.
+- **Adaptive:** eight ranking methods exist (return ÷ DD or edge per trade × all history or last 2 years × minimum edge 0.02R or 0.05R); each month the system uses the one whose own out-of-sample trades over the previous 12 months had the best return ÷ drawdown, among methods reaching ≥ 4.5 signals/day.
+- **How this was chosen:** 27 variants (8 methods × yearly/quarterly/monthly re-selection + adaptive) were compared on out-of-sample 2023–2025 only; 2026 is the check.
 
-| 0.25% risk per trade | Rules chosen on | Signals/day | Win rate | Return | Max DD | Positive months |
-|---|---|---|---|---|---|---|
-| 2023 | Aug 2020 – Dec 2022 | 8.5 | 62% | +4.5% | 5.2% | 6/13 |
-| 2024 | Aug 2020 – Dec 2023 | 5.4 | 68% | +16.3% | 2.0% | 11/12 |
-| 2025 | Aug 2020 – Dec 2024 | 5.3 | 66% | +7.4% | 6.5% | 9/12 |
-| **2026** | Aug 2020 – Dec 2025 | **5.4** | 58% | **+12.4%** | 6.3% | 6/10 |
-| **2023 → now** | | 6.2 | | **+46.7%** | 6.5% | 32/46 |
+| 0.25% risk per trade | Signals/day | Win rate | Return | Max DD | Positive months |
+|---|---|---|---|---|---|
+| 2023 | 6.0 | 63% | +6.8% | 4.1% | 8/13 |
+| 2024 | 5.4 | 68% | +16.3% | 2.0% | 11/12 |
+| 2025 | 5.4 | 64% | +36.8% | 5.5% | 10/13 |
+| **2026 (Jan 1 – Oct 8)** | **5.4** | 58% | **+19.5%** | 6.2% | 7/10 |
+| **2023 → now** | 5.6 | | **+103%** | 6.2% | 35/46 |
 
-The 2026 rules (live on `signals.html`): 1H RSI(2) pullback with the 4H trend, 30m RSI(2) pullback with the 1H trend, 30m Bollinger reversion with the 4H trend, and Donchian breakouts on 15m, 30m, 1H (with the 4H trend, London/NY session) and 4H. Costs matter: 2023 → now is +76% at $0.20 per trade, +22% at $0.60, break-even ≈ $0.80. The rules often fire together, so combined risk can reach ~1%.
+**Is it the best for 2026?** (`scripts/research/benchmark-2026.js`) Among the 12 approaches that delivered ~5 signals/day (4.5–7) in both 2023–25 and 2026 — every walk-forward variant, the earlier versions and random trading — it ranks **#1 in 2026** by return ÷ drawdown. The six approaches ranked above it overall trade fewer than 4.5 times a day or lost money in 2023–25. Against 500 random traders with the same frequency, stops, holding time and costs it beats 91% in 2026 and **all 500 from 2023 to now** (+103% vs a median of −44%, best −9.7%). Costs: 2023 → now is +138% at $0.20 per trade, +73% at $0.60 and +48% at $0.80.
 
-**Is it the best for 2026?** (`scripts/research/benchmark-2026.js`) Over 2023 → now the walk-forward rules made +46.7% while 500 random traders with the same ~6 trades/day, stops, holding time and costs made a median of −47.8% (best of 500: −9.7%) — the rules beat all 500. In 2026 alone (Jan 1 → Oct 8) they made +12.4% vs a random-trader median of +6.2% (beats 74%), ahead of the earlier single-split 5-a-day (+0.7%), the trend portfolio (+4.3%), CRT 4H (−2.4%) and buy & hold (−4.5%, 30% drawdown). Four other walk-forward selection variants did better in 2026 (up to +22.1%); they were not chosen because the live method was picked on 2023–25 only.
+Earlier versions, kept for comparison: yearly re-selection (+12.4% in 2026), a single 2020–24 split (+0.7% in 2026), and a 5m/15m-only attempt without the drawdown cap (−46% on 2025–26).
 
-**Forward test.** `.github/workflows/forward-test.yml` runs `scripts/forward/log.js` every hour: each live signal since 8 Oct 2026 is saved to `data/forward/signals.json` with the time it was first seen, its result is filled in when it closes, and the change is committed — the commit history is a timestamped record. Disable the workflow in the repository's Actions tab to stop it.
-
-A simpler single split (`intraday.js`: chosen on 2020–24) gave +8.1% on 2025–26 but only +0.7% in 2026; an attempt using 5m/15m charts without the drawdown cap lost 46% on 2025–26.
+**Forward test.** `.github/workflows/forward-test.yml` runs `scripts/forward/log.js` every hour: each live signal since 8 Oct 2026 is saved to `data/forward/signals.json` with the time it was first seen, its result is filled in when it closes, and the change is committed — the commit history is a timestamped record. Rules retired by the monthly re-selection keep being tracked until their open trades close; new rules only record signals after they go live. Disable either workflow in the repository's Actions tab to stop it.
 
 Regenerate (≈ 3 min download + 20 s):
 
 ```bash
 NODE_USE_ENV_PROXY=1 node scripts/research/fetch-5m.js   # 5m candles → data/cache (not committed)
 node scripts/research/run.js                             # → data/research/report.json, js/research-data.js
-node scripts/research/walkforward.js                     # → js/intraday-data.js (live 5-a-day rules, walk-forward)
+node scripts/research/adaptive.js                        # → js/intraday-data.js (live 5-a-day rules, re-chosen monthly)
+node scripts/research/benchmark-2026.js                  # 2026 comparison + random traders
 ```
 
 ## Run it

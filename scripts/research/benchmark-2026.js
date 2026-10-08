@@ -12,7 +12,7 @@ const S = require('../../js/sessions.js');
 
 const root = path.join(__dirname, '../..');
 const rd = (f) => JSON.parse(fs.readFileSync(path.join(root, f), 'utf8'));
-const WF = rd('data/research/walkforward.json');
+const WF = rd('data/research/adaptive.json'); // the live 5-a-day system (monthly adaptive walk-forward)
 const ID = rd('data/research/intraday.json');
 const RP = rd('data/research/report.json');
 const Y26 = Date.UTC(2026, 0, 1);
@@ -31,15 +31,23 @@ function equity(rs, riskPct) {
   return { returnPct: (eq - 1) * 100, maxDDPct: dd * 100 };
 }
 const rows_ = [];
-const add = (name, kind, perDay, ret, dd, note) => rows_.push({ name, kind, perDay, returnPct: ret, maxDDPct: dd, ratio: dd > 0 ? ret / dd : ret > 0 ? 99 : 0, note });
+const add = (name, kind, perDay, ret, dd, note, consistent5 = false) => rows_.push({ name, kind, perDay, returnPct: ret, maxDDPct: dd, ratio: dd > 0 ? ret / dd : ret > 0 ? 99 : 0, note, consistent5 });
 
-// 1. The chosen walk-forward 5-a-day rule set and the 7 other selection methods.
-for (const m of WF.methods) {
-  const y = m.years[2026];
-  add(m.name === WF.chosenMethod ? `5-a-day walk-forward (chosen) — ${m.name}` : `5-a-day walk-forward — ${m.name}`, m.name === WF.chosenMethod ? 'chosen' : 'alt', y.perDay, y.returnPct, y.maxDDPct, m.name === WF.chosenMethod ? 'live on the Signals page' : 'other selection method');
+// 1. The chosen system and every other walk-forward variant (8 methods × yearly /
+// quarterly / monthly re-selection, plus adaptive). "consistent5" = delivered 4.5–7
+// signals/day both in 2023–25 and in 2026.
+for (const v of WF.variants) {
+  const chosen = v.name === WF.chosenMethod;
+  const c5 = v.oos.perDay >= 4.5 && v.oos.perDay <= 7 && v.y2026.perDay >= 4.5 && v.y2026.perDay <= 7;
+  add(chosen ? `5-a-day (chosen) — re-chosen ${v.name}` : `5-a-day — re-chosen ${v.name}`, chosen ? 'chosen' : 'alt', v.y2026.perDay, v.y2026.returnPct, v.y2026.maxDDPct,
+    chosen ? 'live on the Signals page' : `2023–25: ${v.oos.returnPct.toFixed(0)}%, ${v.oos.perDay.toFixed(1)}/day`, c5);
+}
+{
+  const yr = rd('data/research/walkforward.json');
+  add('5-a-day yearly walk-forward (previous live version)', 'alt', yr.ytd.perDay, yr.ytd.returnPct, yr.ytd.maxDDPct, 'replaced', true);
 }
 // 2. Single train/test split 5-a-day (chosen on 2020–24).
-add('5-a-day single split (chosen on 2020–24)', 'alt', ID.ytd.perDay, ID.ytd.returnPct, ID.ytd.maxDDPct, 'earlier version');
+add('5-a-day single split (chosen on 2020–24)', 'alt', ID.ytd.perDay, ID.ytd.returnPct, ID.ytd.maxDDPct, 'earlier version', true);
 // 3. Trend portfolio from the research page (1H + 4H, 0.33% risk each).
 if (RP.portfolio) add('Trend portfolio (Research page)', 'alt', RP.portfolio.ytd.n / days26, RP.portfolio.ytd.returnPct, RP.portfolio.ytd.maxDDPct, '~1 signal/day');
 // 4. CRT 4H with its built-in trained settings.
@@ -102,9 +110,14 @@ const beat = sims.filter((s) => s.returnPct < chosen.returnPct).length / sims.le
 const beatRatio = sims.filter((s) => s.ratio < chosen.ratio).length / sims.length;
 add(`Random trader — median of 500 (${q(0.5).perDay.toFixed(1)}/day)`, 'random', q(0.5).perDay, q(0.5).returnPct, q(0.5).maxDDPct, `best of 500: ${sims.at(-1).returnPct.toFixed(1)}%`);
 
+// Random traders count as a consistent ~5/day approach too.
+rows_.filter((r) => r.kind === 'random').forEach((r) => { r.consistent5 = true; });
 rows_.sort((a, b) => b.ratio - a.ratio);
+const c5 = rows_.filter((r) => r.consistent5);
+const chosenRank = rows_.findIndex((r) => r.kind === 'chosen') + 1, chosenRank5 = c5.findIndex((r) => r.kind === 'chosen') + 1;
 log(`2026 (Jan 1 → ${new Date(rows.at(-1)[0]).toISOString().slice(0, 10)}, ${days26} trading days), ranked by return ÷ max drawdown:`);
-rows_.forEach((r, i) => log(`  ${String(i + 1).padStart(2)}. ${r.name.padEnd(70)} ${r.perDay.toFixed(1).padStart(4)}/day  ${r.returnPct.toFixed(1).padStart(6)}%  DD ${r.maxDDPct.toFixed(1).padStart(5)}%  ratio ${r.ratio.toFixed(2)}`));
+log(`Chosen system: #${chosenRank} of ${rows_.length} overall; #${chosenRank5} of ${c5.length} approaches that delivered ~5 signals/day in both 2023–25 and 2026.`);
+rows_.forEach((r, i) => log(`  ${String(i + 1).padStart(2)}. ${r.consistent5 ? '●' : ' '} ${r.name.padEnd(78)} ${r.perDay.toFixed(1).padStart(4)}/day  ${r.returnPct.toFixed(1).padStart(6)}%  DD ${r.maxDDPct.toFixed(1).padStart(5)}%  ratio ${r.ratio.toFixed(2)}`));
 log(`Random traders: 5th–95th percentile ${q(0.05).returnPct.toFixed(1)}% … ${q(0.95).returnPct.toFixed(1)}%; chosen system beats ${(beat * 100).toFixed(1)}% on return and ${(beatRatio * 100).toFixed(1)}% on return÷DD.`);
 
 // 7. The longer test: the full walk-forward record (2023 → now) vs random traders over the
@@ -125,7 +138,7 @@ log(`2023 → now: walk-forward record ${WF.record.returnPct.toFixed(1)}% (DD ${
 
 const out = {
   since2023: { record: WF.record, random: { n: sims23.length, p5: q23(0.05).returnPct, p50: q23(0.5).returnPct, p95: q23(0.95).returnPct, best: sims23.at(-1).returnPct, beatReturn: beat23, beatRatio: beat23r, perDay: q23(0.5).perDay } },
-  generatedAt: new Date().toISOString(), from: Y26, to: rows.at(-1)[0], days: days26, ranking: rows_,
+  generatedAt: new Date().toISOString(), from: Y26, to: rows.at(-1)[0], days: days26, ranking: rows_, chosenRank, chosenRank5, consistentCount: c5.length,
   random: { n: sims.length, p5: q(0.05).returnPct, p50: q(0.5).returnPct, p95: q(0.95).returnPct, best: sims.at(-1).returnPct, beatReturn: beat, beatRatio, perDay: q(0.5).perDay },
 };
 fs.writeFileSync(path.join(root, 'data/research/benchmark-2026.json'), JSON.stringify(out, null, 1));

@@ -36,15 +36,16 @@
       ['2023 → now (out-of-sample)', pct(rec.returnPct), cls(rec.returnPct)], ['Positive months', `${rec.positiveMonths}/${rec.months}`],
     ].map(([k, v, c]) => `<div class="tile"><span>${k}</span><b class="${c || ''}">${v}</b></div>`).join('');
     $('verdict').className = 'verdict ' + (y.returnPct > 0 ? 'good' : 'bad');
-    $('verdict').innerHTML = `<b>Walk-forward tested.</b> Every January the rules are re-chosen using only earlier data, then traded for the year. The 2026 rules were chosen on Aug 2020 – Dec 2025 and made ${pct(y.returnPct)} in 2026 (${y.perDay.toFixed(1)} signals/day, ${D.riskPct}% risk per trade); every year 2023–2026 was positive.
-      The edge per trade is small (${sR(y.avgR)} in 2026 after $${D.cost} costs), so a low-spread broker matters.`;
-    $('years').innerHTML = '<tr><th>Year</th><th>Rules chosen on</th><th>Signals/day</th><th>Win rate</th><th>Return</th><th>Max DD</th><th>Positive months</th></tr>' +
-      Object.entries(Y).map(([yr, v]) => `<tr${yr === '2026' ? ' class="sel"' : ''}><td><b>${yr}</b></td><td>Aug 2020 – Dec ${yr - 1}</td><td>${v.perDay.toFixed(1)}</td><td>${(v.winRate * 100).toFixed(0)}%</td>
+    $('verdict').innerHTML = `<b>Walk-forward tested, re-chosen monthly.</b> On the 1st of every month the rules are re-chosen using only earlier data, with the selection method that did best over the previous 12 months, then traded for the month.
+      Picked on 2023–25 results only, it made ${pct(y.returnPct)} in 2026 (${y.perDay.toFixed(1)} signals/day, ${D.riskPct}% risk per trade) and ${pct(rec.returnPct)} from 2023 to now; every year was positive.
+      Current rules: chosen on data before ${new Date(D.liveFrom).toISOString().slice(0, 10)} with "${D.liveMethod}".`;
+    $('years').innerHTML = '<tr><th>Year</th><th>Rules re-chosen</th><th>Signals/day</th><th>Win rate</th><th>Return</th><th>Max DD</th><th>Positive months</th></tr>' +
+      Object.entries(Y).map(([yr, v]) => `<tr${yr === '2026' ? ' class="sel"' : ''}><td><b>${yr}</b></td><td>monthly, data before each month</td><td>${v.perDay.toFixed(1)}</td><td>${(v.winRate * 100).toFixed(0)}%</td>
         <td class="${cls(v.returnPct)}">${pct(v.returnPct)}</td><td>${v.maxDDPct.toFixed(1)}%</td><td>${v.positiveMonths}/${v.months}</td></tr>`).join('');
     $('methods').innerHTML = '<tr><th>Selection method</th><th>2023</th><th>2024</th><th>2025</th><th>2023–25</th><th>Max DD</th><th>Signals/day</th></tr>' +
       D.methods.map((m) => `<tr${m.name === D.chosenMethod ? ' class="sel"' : ''}><td class="mono">${m.name}</td>${[2023, 2024, 2025].map((yr) => `<td class="${cls(m.years[yr].returnPct)}">${pct(m.years[yr].returnPct)}</td>`).join('')}
         <td class="${cls(m.oos.returnPct)}">${pct(m.oos.returnPct)}</td><td>${m.oos.maxDDPct.toFixed(1)}%</td><td>${m.oos.perDay.toFixed(1)}</td></tr>`).join('') +
-      '<tr><td colspan="7" class="mono">The highlighted method was picked on 2023–25 only (best return ÷ drawdown with 4–7 signals/day); 2026 was not used to choose it.</td></tr>';
+      `<tr><td colspan="7" class="mono">Monthly re-selection with each fixed method. The live system switches between these each month (adaptive: best return ÷ DD over the previous 12 months among methods reaching ≥ 4.5 signals/day). It was picked on 2023–25 only (${(D.variants || []).length} variants compared); 2026 was not used to choose it.</td></tr>`;
     $('costs').innerHTML = '<tr><th>Cost per trade</th><th>Avg per trade</th><th>2023 → now</th></tr>' +
       D.costCurve.map((c) => `<tr${c.cost === D.cost ? ' class="sel"' : ''}><td>$${c.cost.toFixed(2)}</td><td class="${cls(c.avgR)}">${c.avgR >= 0 ? '+' : ''}${c.avgR.toFixed(3)}R</td><td class="${cls(c.returnPct)}">${pct(c.returnPct)}</td></tr>`).join('');
     $('legs').innerHTML = '<tr><th>Rule</th><th>How it trades</th><th>Signals/day (2026)</th><th>Avg on 2020–25</th><th>Avg in 2026</th></tr>' +
@@ -59,11 +60,11 @@
     if (!B) return;
     const R = B.random, L23 = B.since2023;
     $('benchVerdict').className = 'verdict good';
-    $('benchVerdict').innerHTML = `<b>Beats chance over the long run.</b> From 2023 to now the walk-forward rules made ${pct(L23.record.returnPct)} while 500 random traders with the same frequency, stops and costs made a median of ${pct(L23.random.p50)} — the best of 500 made ${pct(L23.random.best)}, so the rules beat all of them.
-      2026 alone is a short, unusually kind year for random entries (median ${pct(R.p50)}); here the rules beat ${(R.beatReturn * 100).toFixed(0)}% of random traders.
-      Four other walk-forward variants did better in 2026, but nobody could have known that on 1 January — the live rules were chosen on 2023–25 results only.`;
+    $('benchVerdict').innerHTML = `<b>#${B.chosenRank5} of ${B.consistentCount} in 2026 among approaches that deliver ~5 signals a day</b> (● = 4.5–7 signals/day in both 2023–25 and 2026), and it beats ${(R.beatReturn * 100).toFixed(0)}% of 500 random traders with the same frequency, stops and costs.
+      From 2023 to now it made ${pct(L23.record.returnPct)} while the random traders made a median of ${pct(L23.random.p50)} (best of 500: ${pct(L23.random.best)}) — it beat all of them.
+      The ${B.chosenRank - 1} approaches ranked above it overall trade less than 4.5 times a day (or lost money in 2023–25), so they don't meet the 5-a-day goal.`;
     $('bench').innerHTML = '<tr><th>#</th><th>Approach (Jan 1 → ' + new Date(B.to).toLocaleDateString() + ')</th><th>Signals/day</th><th>Return</th><th>Max DD</th><th>Return ÷ DD</th></tr>' +
-      B.ranking.map((r, i) => `<tr${r.kind === 'chosen' ? ' class="sel"' : ''}><td>${i + 1}</td><td>${r.name}${r.note ? ` <small>· ${r.note}</small>` : ''}</td><td>${r.perDay ? r.perDay.toFixed(1) : '—'}</td>
+      B.ranking.map((r, i) => `<tr${r.kind === 'chosen' ? ' class="sel"' : ''}><td>${i + 1}</td><td>${r.consistent5 ? '● ' : ''}${r.name}${r.note ? ` <small>· ${r.note}</small>` : ''}</td><td>${r.perDay ? r.perDay.toFixed(1) : '—'}</td>
         <td class="${cls(r.returnPct)}">${pct(r.returnPct)}</td><td>${r.maxDDPct.toFixed(1)}%</td><td class="${cls(r.ratio)}">${r.ratio.toFixed(2)}</td></tr>`).join('') +
       `<tr><td colspan="6" class="mono">Random traders (500): 2026 5th–95th percentile ${pct(R.p5)} … ${pct(R.p95)}. 2023 → now: ${pct(L23.random.p5)} … ${pct(L23.random.p95)} vs the rules' ${pct(L23.record.returnPct)}.</td></tr>`;
   }

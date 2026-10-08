@@ -1,0 +1,45 @@
+# Re-choose the 5-a-day rule set on the 1st of every month (walk-forward): download the
+# latest 5-minute gold data, run the adaptive selection with data before this month,
+# and commit the new live rules (js/intraday-data.js) used by the Signals page and the
+# forward test. Disable this workflow in the Actions tab to stop it.
+name: Monthly rule re-selection (5-a-day signals)
+
+on:
+  schedule:
+    - cron: "5 0 1 * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: forward-test
+  cancel-in-progress: false
+
+jobs:
+  reselect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - uses: actions/cache@v4
+        with:
+          path: data/cache
+          key: paxg-5m-${{ github.run_id }}
+          restore-keys: paxg-5m-
+      - name: Download / top up 5-minute data
+        run: node scripts/research/fetch-5m.js
+      - name: Re-choose rules
+        run: node --max-old-space-size=12000 scripts/research/adaptive.js
+      - name: Commit if changed
+        run: |
+          git pull --rebase origin "$GITHUB_REF_NAME" || true
+          if git diff --quiet -- js/intraday-data.js data/research/adaptive.json; then exit 0; fi
+          git config user.name "forward-test-bot"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add js/intraday-data.js data/research/adaptive.json
+          git commit -m "Monthly re-selection: 5-a-day rules for $(date -u +%Y-%m)"
+          git push
