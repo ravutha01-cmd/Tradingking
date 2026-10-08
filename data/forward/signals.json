@@ -12,8 +12,12 @@
    "entry": 4128.13,
    "stop": 4152.17,
    "target": null,
-   "status": "open",
-   "rule_key": "30-pullback-eyJsZW4iOjIsImxvIjoyNSwi"
+   "status": "closed",
+   "rule_key": "30-pullback-eyJsZW4iOjIsImxvIjoyNSwi",
+   "exitTime": "2026-10-08T05:00:00.000Z",
+   "exit": 4141.42,
+   "why": "signal",
+   "r": -0.569
   },
   {
    "key": "30-bbrev-eyJuIjoyMCwiYXRyIjozLCJt-1791421200000--1",
@@ -24,19 +28,23 @@
    "entry": 4128.13,
    "stop": 4152.17,
    "target": 4120.09,
-   "status": "open",
-   "rule_key": "30-bbrev-eyJuIjoyMCwiYXRyIjozLCJt"
+   "status": "closed",
+   "rule_key": "30-bbrev-eyJuIjoyMCwiYXRyIjozLCJt",
+   "exitTime": "2026-10-08T10:30:00.000Z",
+   "exit": 4120.09,
+   "why": "target",
+   "r": 0.318
   }
  ],
  "summary": {
-  "updated": "2026-10-08T05:28:21.286Z",
+  "updated": "2026-10-08T13:17:34.516Z",
   "signals": 2,
-  "open": 2,
-  "closed": 0,
-  "winRate": null,
-  "totalR": 0,
-  "returnPct": 0,
-  "maxDDPct": 0,
+  "open": 0,
+  "closed": 2,
+  "winRate": 0.5,
+  "totalR": -0.251,
+  "returnPct": -0.06,
+  "maxDDPct": 0.14,
   "perDay": 2
  },
  "registry": {
