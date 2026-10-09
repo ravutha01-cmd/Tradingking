@@ -69,7 +69,7 @@
   function renderBest() {
     const P = R.portfolio, B = R.benchmark;
     if (!P) { $('bestIntro').textContent = 'No portfolio in this report.'; return; }
-    $('bestIntro').innerHTML = `<div class="verdict ${P.test.returnPct > 0 ? 'good' : 'bad'}"><b>Trend portfolio:</b> three rules on the 1H and 4H charts, each risking 0.33% of the account per trade (1% in total).
+    $('bestIntro').innerHTML = `<div class="verdict ${P.test.returnPct > 0 ? 'good' : 'bad'}"><b>Research result, not traded.</b> The live trade signals come from the 5-a-day rules on the <a href="index.html">Desk</a>, which ranked higher in 2026. <b>Trend portfolio:</b> three rules on the 1H and 4H charts, each risking 0.33% of the account per trade (1% in total).
       It was the top-3 of the training ranking (2020–2024) and stayed profitable on 2025–2026, which it never saw:
       <b>${pct(P.test.returnPct, 1)}</b> with a worst drawdown of ${P.test.maxDDPct.toFixed(1)}%, and <b>${pct(P.ytd.returnPct, 1)}</b> so far in 2026 (gold itself: ${pct(B.ytd.returnPct, 1)}).
       Returns are small because risk is small — they scale roughly with the risk you choose, and so do drawdowns.</div>`;

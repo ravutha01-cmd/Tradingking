@@ -1,0 +1,111 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TradingKing · Chart &amp; Momentum</title>
+  <meta name="description" content="Live XAUUSD chart, momentum read and multi-timeframe indicators." />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
+<body>
+  <header class="topbar">
+    <div class="brand">👑 TradingKing <span>Chart &amp; Momentum</span></div>
+    <nav class="nav" id="nav" aria-label="Pages"></nav>
+    <div class="ticker">
+      <span class="price" id="price">—</span>
+      <span class="change" id="change">—</span>
+      <span id="newsPill"></span>
+      <span class="status" id="status"><i></i><b>connecting</b></span>
+    </div>
+  </header>
+  <div class="news-banner" id="newsBanner" role="alert" hidden></div>
+
+  <section class="controls">
+    <label>Timeframe
+      <select id="interval">
+        <option value="1m">1m</option>
+        <option value="5m">5m</option>
+        <option value="15m" selected>15m</option>
+        <option value="1h">1H</option>
+        <option value="4h">4H</option>
+        <option value="1d">1D</option>
+      </select>
+    </label>
+    <label>Data feed
+      <select id="feed">
+        <option value="binance">Gold (PAXG/USDT, Binance) – free, real-time</option>
+        <option value="twelvedata">Spot XAU/USD (Twelve Data) – API key</option>
+      </select>
+    </label>
+    <label id="keyWrap" hidden>Twelve Data API key
+      <input id="apiKey" type="password" placeholder="paste key" autocomplete="off" />
+    </label>
+    <label>Stop loss (× ATR)
+      <input id="slAtr" type="number" min="0.5" max="5" step="0.25" value="1.5" />
+    </label>
+    <label class="check"><input id="notify" type="checkbox" /> Alerts</label>
+  </section>
+
+  <main class="grid">
+    <section class="card signal-card" id="signalCard">
+      <h2>Momentum read <small id="signalTf"></small></h2>
+      <p class="hint note">Indicator score only — <b>not a trade signal</b>. Live trades come from the tested 5-a-day rules on the <a href="index.html">Desk</a>.</p>
+      <div class="action" id="action">WAIT</div>
+      <div class="meter"><div id="meterBar"></div></div>
+      <div class="confidence" id="confidence">Loading market data…</div>
+      <table class="plan" id="plan"></table>
+      <ul class="reasons" id="reasons"></ul>
+      <p class="updated" id="updated"></p>
+    </section>
+
+    <section class="card chart-card">
+      <h2>Live chart · OANDA:XAUUSD</h2>
+      <div class="tv" id="tvChart"></div>
+    </section>
+
+    <section class="card crt-mini" id="crtCard">
+      <h2>CRT 4H <span class="tag neutral" title="CRT lost money on unseen data in testing">research only · failed out-of-sample</span> <a href="crt.html" class="link">lab →</a></h2>
+      <div class="action" id="crtMiniAction">—</div>
+      <p class="confidence" id="crtMiniNote">Loading…</p>
+      <table class="plan" id="crtMiniPlan"></table>
+    </section>
+
+    <section class="card">
+      <h2>Multi-timeframe</h2>
+      <table class="mtf" id="mtf"><tr><td>Loading…</td></tr></table>
+    </section>
+
+    <section class="card">
+      <h2>Indicators</h2>
+      <table class="ind" id="indicators"></table>
+    </section>
+
+    <section class="card">
+      <h2>TradingView technical rating</h2>
+      <div class="tv-ta" id="tvTa"></div>
+    </section>
+
+    <section class="card">
+      <h2>Signal history <button class="link" id="clearHistory">clear</button></h2>
+      <div class="history-wrap"><table class="history" id="history"></table></div>
+    </section>
+  </main>
+
+  <footer>
+    Signals are generated automatically from technical indicators and are for educational purposes only — not financial advice.
+    Trading gold on margin carries a high level of risk. Charts &amp; rating by <a href="https://www.tradingview.com/" target="_blank" rel="noopener">TradingView</a>.
+  </footer>
+
+  <script src="js/events-data.js"></script>
+  <script src="js/indicators.js"></script>
+  <script src="js/signals.js"></script>
+  <script src="js/sessions.js"></script>
+  <script src="js/crt.js"></script>
+  <script src="js/history.js"></script>
+  <script src="js/crt-trained.js"></script>
+  <script src="js/data.js"></script>
+  <script src="js/app.js"></script>
+  <script src="js/ui.js"></script>
+  <script>UI.shell('momentum.html');</script>
+</body>
+</html>

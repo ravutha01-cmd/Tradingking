@@ -10,21 +10,23 @@
 <body>
   <header class="topbar">
     <div class="brand">👑 TradingKing <span>5-a-Day Signals</span></div>
-    <nav class="nav"><a href="index.html">Dashboard</a><a href="signals.html" class="active">Signals</a><a href="crt.html">CRT 4H Lab</a><a href="research.html">Research</a></nav>
+    <nav class="nav" id="nav" aria-label="Pages"></nav>
     <div class="ticker">
       <span class="price" id="price">—</span>
+      <span id="newsPill"></span>
       <span class="status" id="status"><i></i><b>loading</b></span>
     </div>
   </header>
+  <div class="news-banner" id="newsBanner" role="alert" hidden></div>
 
   <main class="lab">
     <section class="card span2" id="nowCard">
       <h2>Signals now <small id="updated"></small></h2>
       <div id="newSignal"></div>
       <h3>Open positions</h3>
-      <div class="table-scroll"><table class="history" id="open"><tr><td>Loading live data…</td></tr></table></div>
+      <div class="table-scroll"><table class="history stack" id="open"><tr><td>Loading live data…</td></tr></table></div>
       <h3>Today's signals <small id="dayLabel"></small></h3>
-      <div class="table-scroll"><table class="history" id="today"></table></div>
+      <div class="table-scroll"><table class="history stack" id="today"></table></div>
       <div class="buttons"><label class="check"><input type="checkbox" id="alerts" /> Sound + desktop alert on new signals</label></div>
     </section>
 
@@ -62,7 +64,7 @@
       <div class="chart" id="equity"></div>
       <details><summary>How the selection method was chosen</summary><div class="table-scroll"><table class="history" id="methods"></table></div></details>
       <h3>Last 7 days of signals</h3>
-      <div class="table-scroll history-wrap"><table class="history" id="recent"></table></div>
+      <div class="table-scroll history-wrap"><table class="history stack" id="recent"></table></div>
     </section>
   </main>
 
@@ -71,6 +73,7 @@
     Past results do not guarantee future results. Educational use only — not financial advice. Regenerate: <code>node scripts/research/adaptive.js</code> (runs automatically on the 1st of each month)
   </footer>
 
+  <script src="js/events-data.js"></script>
   <script src="js/indicators.js"></script>
   <script src="js/sessions.js"></script>
   <script src="js/history.js"></script>
@@ -78,6 +81,9 @@
   <script src="js/intraday-data.js"></script>
   <script src="js/benchmark-data.js"></script>
   <script src="js/forward-data.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/engine.js"></script>
+  <script>UI.shell('signals.html');</script>
   <script src="js/signals5.js"></script>
 </body>
 </html>

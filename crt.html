@@ -10,12 +10,14 @@
 <body>
   <header class="topbar">
     <div class="brand">👑 TradingKing <span>CRT 4H Lab</span></div>
-    <nav class="nav"><a href="index.html">Dashboard</a><a href="signals.html">Signals</a><a href="crt.html" class="active">CRT 4H Lab</a><a href="research.html">Research</a></nav>
+    <nav class="nav" id="nav" aria-label="Pages"></nav>
     <div class="ticker">
       <span class="price" id="price">—</span>
+      <span id="newsPill"></span>
       <span class="status" id="status"><i></i><b>loading</b></span>
     </div>
   </header>
+  <div class="news-banner" id="newsBanner" role="alert" hidden></div>
 
   <main class="lab">
     <section class="card span2">
@@ -95,11 +97,14 @@
     Backtests use historical data and simple fill assumptions (stop counted first if stop and target are inside the same candle). Past results do not guarantee future results. Educational use only — not financial advice.
   </footer>
 
+  <script src="js/events-data.js"></script>
   <script src="js/indicators.js"></script>
   <script src="js/sessions.js"></script>
   <script src="js/crt.js"></script>
   <script src="js/crt-trained.js"></script>
   <script src="js/history.js"></script>
   <script src="js/crt-lab.js"></script>
+  <script src="js/ui.js"></script>
+  <script>UI.shell('crt.html');</script>
 </body>
 </html>

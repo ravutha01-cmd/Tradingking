@@ -18,6 +18,7 @@ A static web app that shows **live XAUUSD (gold) trading signals**: it streams l
 - **Signal history**: new BUY/SELL signals are logged on candle close (saved in the browser).
 - **Alerts**: optional sound and desktop notification when a new signal appears.
 - Timeframes: 1m, 5m, 15m, 1H, 4H, 1D.
+- **Trading Desk** (`index.html`, the home page): one screen for "what should I do now" — live signal cards from the official 5-a-day rules with entry/stop/target and a **position size** (lots and $ at risk from your balance, risk %, contract size and spread), open positions with live R and $ and combined risk, a multi-timeframe trend strip, a countdown to the next CPI/PPI/NFP/FOMC release with a release-window warning, and the live forward-test record next to the backtest. Every page shares the same navigation (a bottom tab bar on phones) and news countdown. The older indicator dashboard is now `momentum.html` ("Chart"), labelled as a momentum read, not a trade signal.
 - **5-a-Day Signals** (`signals.html`): about 5 live XAUUSD signals per day from walk-forward tested rules re-chosen monthly (+19.5% in 2026 at 0.25% risk per trade, #1 of 12 consistent ~5/day approaches), with open positions, today's signals, combined risk, sound/desktop alerts, yearly results and cost sensitivity. See [5 signals a day](#5-signals-a-day).
 - **Research** (`research.html`): live analysis on every timeframe (15m → weekly), the best-tested strategy for 2026 with live status, every strategy × timeframe result, and CPI / PPI / NFP / FOMC news behaviour with an upcoming-release calendar. See [Research](#research-xauusd-2026).
 - **TradingView indicator** (`tradingview/`): ICT Setup Checklist — bias table, sessions, liquidity sweeps, MSS, IRL, FVG/IFVG, 8-point checklist, entry/stop/target and alerts. See [tradingview/README.md](tradingview/README.md).
@@ -121,6 +122,8 @@ The live 5-a-day system is chosen **walk-forward and re-chosen every month** (`s
 
 **Is it the best for 2026?** (`scripts/research/benchmark-2026.js`) Among the 12 approaches that delivered ~5 signals/day (4.5–7) in both 2023–25 and 2026 — every walk-forward variant, the earlier versions and random trading — it ranks **#1 in 2026** by return ÷ drawdown. The six approaches ranked above it overall trade fewer than 4.5 times a day or lost money in 2023–25. Against 500 random traders with the same frequency, stops, holding time and costs it beats 91% in 2026 and **all 500 from 2023 to now** (+103% vs a median of −44%, best −9.7%). Costs: 2023 → now is +138% at $0.20 per trade, +73% at $0.60 and +48% at $0.80.
 
+**Tested and rejected (Oct 2026, `scripts/research/experiments/improvements.js`):** a ±30/±60-minute news blackout, a cap on same-direction positions (1–3), a 1H volatility-regime filter and edge-scaled position sizing. The adoption rule, set before running, was a ≥ 10% better 2023–25 return ÷ drawdown with 4.5–7 signals/day; none passed (best: news ±30 min, +3%), so the live system is unchanged. The Desk's release warning is therefore advice about spreads and spikes, not a rule.
+
 Earlier versions, kept for comparison: yearly re-selection (+12.4% in 2026), a single 2020–24 split (+0.7% in 2026), and a 5m/15m-only attempt without the drawdown cap (−46% on 2025–26).
 
 **Forward test.** `.github/workflows/forward-test.yml` runs `scripts/forward/log.js` every hour: each live signal since 8 Oct 2026 is saved to `data/forward/signals.json` with the time it was first seen, its result is filled in when it closes, and the change is committed — the commit history is a timestamped record. Rules retired by the monthly re-selection keep being tracked until their open trades close; new rules only record signals after they go live. Disable either workflow in the repository's Actions tab to stop it.
@@ -169,7 +172,11 @@ js/sessions.js      New York time, sessions, NY-aligned 4H candles
 js/history.js       1H candle recorder (Binance, saved in the browser)
 js/crt-lab.js       CRT Lab UI
 js/crt-trained.js   built-in trained CRT settings (generated)
-js/signals5.js      5-a-Day Signals page (live signals from the three rules)
+js/engine.js        live engine for the official rules (candle cache, open positions, new signals)
+js/ui.js            shared UI: navigation, news countdown/banner, position sizing, alerts
+js/desk.js          Trading Desk page
+js/events-data.js   US release calendar for the countdown (scripts/build-events.js)
+js/signals5.js      5-a-Day Signals page
 js/intraday-data.js 5-a-day walk-forward results and live rules (generated)
 js/research.js      Research page UI (live multi-timeframe analysis, strategy status, news)
 js/research-data.js research results (generated)
