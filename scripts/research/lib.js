@@ -64,12 +64,14 @@ function backtest(c, strat, p, opts = {}) {
       else if (pos.target != null && pos.dir === 1 && b.high >= pos.target) close(i, pos.target, 'target');
       else if (pos.target != null && pos.dir === -1 && b.low <= pos.target) close(i, pos.target, 'target');
       if (pos) {
-        const why = strat.exit(ctx, i, pos);
+        // Fixed stop/target mode (opts.fixed): only the stop, the target, the time limit or
+        // the 4 PM close end a trade — the strategy's own exit and trailing are ignored.
+        const why = opts.fixed ? null : strat.exit(ctx, i, pos);
         if (why) pos.exitNext = why;
         // Day trading: flat at the 4 PM NY close (exit at the open of the 16:00 candle).
         else if (p.eod && c[i + 1] && c[i + 1].nyHour === 16 && c[i].nyHour !== 16) pos.exitNext = 'eod';
         else if (p.maxBars && i - pos.idx + 1 >= p.maxBars) pos.exitNext = 'time';
-        else if (strat.trail) {
+        else if (strat.trail && !opts.fixed) {
           const s = strat.trail(ctx, i, pos);
           if (s != null) pos.stop = pos.dir === 1 ? Math.max(pos.stop, s) : Math.min(pos.stop, s);
         }
@@ -79,6 +81,8 @@ function backtest(c, strat, p, opts = {}) {
       const sig = entrySignal(c, strat, p, ctx, i);
       if (sig) {
         const entry = c[i + 1].open;
+        // opts.fixed = { sl, tp } in price units: stop and target are set from the fill price.
+        if (opts.fixed) { sig.stop = entry - sig.dir * opts.fixed.sl; sig.target = entry + sig.dir * opts.fixed.tp; }
         const risk = (entry - sig.stop) * sig.dir;
         // Skip trades whose stop is unrealistically tight (< minRiskPct of price, default 0.05% ≈ $2 at $4,000).
         if (risk >= entry * (opts.minRiskPct ?? 0.0005) && (sig.target == null || (sig.target - entry) * sig.dir > 0)) {

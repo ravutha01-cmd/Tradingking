@@ -297,3 +297,6 @@ details > summary { min-height: 32px; display: flex; align-items: center; }
   table.stack td { border: 0; padding: 2px 0; text-align: left !important; }
   table.stack td[data-k]::before { content: attr(data-k) ': '; color: var(--muted); font-size: 12px; }
 }
+.sltp-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; }
+.sltp .tiles { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+@media (max-width: 900px) { .sltp-grid { grid-template-columns: minmax(0, 1fr); } .desk-grid .sltp { order: 2; } }

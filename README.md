@@ -19,6 +19,7 @@ A static web app that shows **live XAUUSD (gold) trading signals**: it streams l
 - **Alerts**: optional sound and desktop notification when a new signal appears.
 - Timeframes: 1m, 5m, 15m, 1H, 4H, 1D.
 - **Trading Desk** (`index.html`, the home page): one screen for "what should I do now" — live signal cards from the official 5-a-day rules with entry/stop/target and a **position size** (lots and $ at risk from your balance, risk %, contract size and spread), open positions with live R and $ and combined risk, a multi-timeframe trend strip, a countdown to the next CPI/PPI/NFP/FOMC release with a release-window warning, and the live forward-test record next to the backtest. Every page shares the same navigation (a bottom tab bar on phones) and news countdown. The older indicator dashboard is now `momentum.html` ("Chart"), labelled as a momentum read, not a trade signal.
+- **100-pip strategy** (Desk panel + `tradingview/tk-100pip-strategy.pine`): fixed **stop loss 100 pips, take profit 300 pips** (gold pip = $0.10), with entry / SL / TP shown live in price and pips and sound/desktop alerts on the Desk, plus a TradingView strategy that sends phone alerts with the levels. See [100-pip strategy](#100-pip-strategy).
 - **5-a-Day Signals** (`signals.html`): about 5 live XAUUSD signals per day from walk-forward tested rules re-chosen monthly (+19.5% in 2026 at 0.25% risk per trade, #1 of 12 consistent ~5/day approaches), with open positions, today's signals, combined risk, sound/desktop alerts, yearly results and cost sensitivity. See [5 signals a day](#5-signals-a-day).
 - **Research** (`research.html`): live analysis on every timeframe (15m → weekly), the best-tested strategy for 2026 with live status, every strategy × timeframe result, and CPI / PPI / NFP / FOMC news behaviour with an upcoming-release calendar. See [Research](#research-xauusd-2026).
 - **TradingView indicator** (`tradingview/`): ICT Setup Checklist — bias table, sessions, liquidity sweeps, MSS, IRL, FVG/IFVG, 8-point checklist, entry/stop/target and alerts. See [tradingview/README.md](tradingview/README.md).
@@ -128,6 +129,17 @@ Earlier versions, kept for comparison: yearly re-selection (+12.4% in 2026), a s
 
 **Forward test.** `.github/workflows/forward-test.yml` runs `scripts/forward/log.js` every hour: each live signal since 8 Oct 2026 is saved to `data/forward/signals.json` with the time it was first seen, its result is filled in when it closes, and the change is committed — the commit history is a timestamped record. Rules retired by the monthly re-selection keep being tracked until their open trades close; new rules only record signals after they go live. Disable either workflow in the repository's Actions tab to stop it.
 
+### 100-pip strategy
+
+`scripts/research/fixed-sltp.js` tests every entry rule (EMA cross, Donchian breakout, RSI(2) pullback, Bollinger reversion, Asia-range breakout) on 5m, 15m, 30m and 1H charts — with optional 1H/4H trend filter, London+NY session, day-trade close and 8h/48h time limit — using a **fixed 100-pip ($10) stop** and a **150 / 200 / 250 / 300-pip take profit**: 4,048 rules, $0.40 cost per trade. The rule is chosen walk-forward (a rule must be profitable in 3 of 4 slices of the selection data, > 0.05R per trade, drawdown ≤ 25%); 12 selection methods (all history / 2 years / 12 months / 6 months × yearly / quarterly / monthly re-selection) were compared on unseen 2023–25, and the best, **quarterly re-selection on all history**, is live:
+
+| 1% risk per trade | Return | Max DD | Win rate | Trades |
+|---|---|---|---|---|
+| 2023–25 (unseen) | +102% | 28% | 45% | 950 |
+| **2026 (to Oct 9)** | **+2.0%** | 13.4% | 28% | 95 |
+
+Current rule (chosen Oct 1, 2026): **15m RSI(2) pullback** — buy when price is above EMA50 and RSI(2) < 10, only with the 4H uptrend and in London/NY hours (sells mirrored); SL 100 pips, TP 300 pips (1 : 3), max 48 h. **A fixed $10 stop is tight for 2026 gold** (a 15-minute candle often moves $5–10), which is why 2026 is roughly flat while earlier, calmer years were strongly positive; shorter look-backs did not fix it (6-month selection lost 20–49% in 2026). Risk 0.5% per trade or less. Cost: 2023–25 is +145% at $0.20 and +38% at $0.80 per trade. Re-chosen automatically by the monthly workflow.
+
 Regenerate (≈ 3 min download + 20 s):
 
 ```bash
@@ -135,6 +147,7 @@ NODE_USE_ENV_PROXY=1 node scripts/research/fetch-5m.js   # 5m candles → data/c
 node scripts/research/run.js                             # → data/research/report.json, js/research-data.js
 node scripts/research/adaptive.js                        # → js/intraday-data.js (live 5-a-day rules, re-chosen monthly)
 node scripts/research/benchmark-2026.js                  # 2026 comparison + random traders
+node scripts/research/fixed-sltp.js                      # → js/sltp-data.js (100-pip SL strategy, ≈ 2 min)
 ```
 
 ## Run it

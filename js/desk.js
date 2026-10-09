@@ -12,7 +12,7 @@
   $('tz').textContent = U.tz;
 
   // ───────── Position size settings ─────────
-  const fields = { szBalance: 'balance', szRisk: 'riskPct', szOz: 'ozPerLot', szSpread: 'spread' };
+  const fields = { szBalance: 'balance', szRisk: 'riskPct', szOz: 'ozPerLot', szSpread: 'spread', szPip: 'pip' };
   const s0 = U.sizing();
   for (const [id, k] of Object.entries(fields)) {
     $(id).value = s0[k];
@@ -70,11 +70,55 @@
     U.age($('actAge'), Date.now());
   }
 
+  // ───────── 100-pip strategy (fixed SL / TP) ─────────
+  const SL = window.SLTP;
+  const sltpRule = SL && { ...SL.live, label: SL.live.label, params: SL.live.params };
+  const fixed = SL && { sl: SL.slPips * SL.pip, tp: SL.live.tpPips * SL.pip };
+  function sltpCard(x, live) {
+    const pipUsd = U.sizing().pip || 0.1;
+    return `<article class="sig ${x.dir === 1 ? 'buy' : 'sell'}">
+      <header>${side(x.dir)} <span class="rule">${UI.tfName(sltpRule.tf)} ${sltpRule.label}</span> <span class="when">${when(x.time)}</span></header>
+      <div class="lvls"><div><span>Entry ≈</span><b>${fmt(x.entry)}</b></div><div><span>Stop loss · ${U.pips(x.entry - x.stop)} pips</span><b class="down">${fmt(x.stop)}</b></div>
+        <div><span>Take profit · ${U.pips(x.target - x.entry)} pips</span><b class="up">${fmt(x.target)}</b></div></div>
+      <p class="size">${U.sizeLine(x.entry, x.stop, x.target)}${live ? ` · now ${fmt(live)} (${((live - x.entry) * x.dir / pipUsd).toFixed(0)} pips)` : ''}</p>
+    </article>`;
+  }
+  function renderSltp() {
+    if (!SL) return;
+    const r = window.Engine.ruleState(sltpRule, fixed, SL.cost);
+    if (!r) return;
+    $('sltpSignal').innerHTML = r.pending ? sltpCard(r.pending) + '<p class="valid">✓ New signal on the latest 15m candle — enter at market.</p>'
+      : r.open ? '<h3>Open trade</h3>' + sltpCard({ dir: r.open.dir, entry: r.open.entry, stop: r.open.stop, target: r.open.target, time: r.open.entryTime }, r.price)
+      : `<div class="empty">No 100-pip signal right now.<br><small>Signals come about every 2 days (London + New York hours). Checked every minute.</small></div>`;
+    $('sltpRecent').innerHTML = r.recent.length ? '<tr><th>Entered</th><th>Side</th><th>Entry</th><th>Result</th></tr>' + r.recent.map((t) =>
+      `<tr><td data-k="Entered">${when(t.entryTime)}</td><td data-k="Side">${side(t.dir)}</td><td data-k="Entry">${fmt(t.entry)}</td><td data-k="Result" class="${cls(t.r)}">${t.why === 'target' ? '✓ TP' : t.why === 'stop' ? '✗ SL' : WHY[t.why] || t.why} ${arrow(t.r)}${((t.exit - t.entry) * t.dir / (U.sizing().pip || 0.1)).toFixed(0)} pips</td></tr>`).join('') : '';
+    // Alerts
+    const key = r.pending ? `${r.pending.time}${r.pending.dir}` : null;
+    if (key && key !== st.sltpSeen) {
+      if (st.sltpSeen !== undefined && $('sltpAlerts').checked) {
+        U.beep(r.pending.dir === 1);
+        U.notify(`XAUUSD ${r.pending.dir === 1 ? 'BUY' : 'SELL'} · 100-pip strategy`, `Entry ≈ ${fmt(r.pending.entry)} · SL ${fmt(r.pending.stop)} · TP ${fmt(r.pending.target)}`);
+      }
+      st.sltpSeen = key; save();
+    } else if (st.sltpSeen === undefined) { st.sltpSeen = ''; save(); }
+  }
+  function renderSltpStatic() {
+    if (!SL) { $('sltpSignal').innerHTML = '<p class="hint">Run scripts/research/fixed-sltp.js to generate this strategy.</p>'; return; }
+    const c = SL.chosen, y = c.y2026, o = c.oos;
+    $('sltpTp').textContent = SL.live.tpPips;
+    $('sltpRule').textContent = `${UI.tfName(SL.live.tf)} ${SL.live.label}, re-chosen quarterly`;
+    $('sltpTiles').innerHTML = [['2026 return', pct(y.returnPct), cls(y.returnPct)], ['2026 win rate', (y.winRate * 100).toFixed(0) + '%'], ['2026 max DD', y.maxDDPct.toFixed(1) + '%'],
+      ['2023–25 (unseen)', pct(o.returnPct, 0), cls(o.returnPct)], ['2023–25 max DD', o.maxDDPct.toFixed(0) + '%'], ['Signals/day', y.perDay.toFixed(2)]]
+      .map(([k, v, cl]) => `<div class="tile"><span>${k}</span><b class="${cl || ''}">${v}</b></div>`).join('');
+    $('sltpNote').innerHTML = `Rule now: ${SL.live.rules}; exit at SL ${SL.slPips} pips, TP ${SL.live.tpPips} pips or after ${SL.live.params.hold} h. Results at ${SL.riskPct}% risk per trade, $${SL.cost} cost. <b class="warn">A fixed $10 stop is tight for 2026 gold (a 15-minute candle often moves $5–10), so it is roughly flat this year — risk 0.5% or less.</b>`;
+  }
+
   async function refresh() {
     try {
       const o = await window.Engine.compute();
       last = o;
       renderLive(o);
+      renderSltp();
       U.setStatus('live');
       // Alerts for signals not seen before (not on the first load).
       const keys = o.fresh.map((x) => `${x.l.tf}${x.l.id}${x.time}${x.dir}`);
@@ -130,6 +174,12 @@
   }
 
   renderStatic();
+  renderSltpStatic();
+  $('sltpAlerts').checked = !!st.sltpAlerts;
+  $('sltpAlerts').addEventListener('change', (e) => {
+    st.sltpAlerts = e.target.checked; save();
+    if (e.target.checked && 'Notification' in window && Notification.permission === 'default') Notification.requestPermission();
+  });
   refresh();
   refreshBias();
   setInterval(refresh, 60000);

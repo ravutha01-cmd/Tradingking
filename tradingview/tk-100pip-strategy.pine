@@ -1,0 +1,102 @@
+// This Pine Script® code is subject to the terms of the Mozilla Public License 2.0 at https://mozilla.org/MPL/2.0/
+// TradingKing · XAUUSD 100-pip strategy
+//
+// Fixed stop loss 100 pips and take profit 300 pips (gold pip = $0.10 → SL $10, TP $30).
+// Entry rule (chosen walk-forward in scripts/research/fixed-sltp.js, Oct 2026 rule set):
+//   • 15-minute chart, London + New York hours only (02:00–11:59 New York time)
+//   • BUY  when close > EMA(50) and RSI(2) < 10, only if the 4H trend is up
+//     (last completed 4H candle: close > EMA50 > EMA200)
+//   • SELL when close < EMA(50) and RSI(2) > 90, only if the 4H trend is down
+//   • one trade at a time; entry at the next candle's open; exit at SL, TP or after 48 hours
+// Use it on OANDA:XAUUSD (or your broker's XAUUSD) on the 15-minute chart. Default size 10 oz (0.1 lot).
+// Alerts: create an alert on this strategy and choose "alert() function calls only" — the message
+// contains the entry, stop loss and take profit. The Strategy
+// Tester shows how it did on your broker's prices. Educational use only — not financial advice.
+
+//@version=6
+strategy("TradingKing · XAUUSD 100-pip strategy", shorttitle = "TK 100-pip", overlay = true, initial_capital = 10000, default_qty_type = strategy.fixed, default_qty_value = 10, commission_type = strategy.commission.cash_per_contract, commission_value = 0, slippage = 0, process_orders_on_close = false, calc_on_every_tick = false)
+
+// ───────── Inputs ─────────
+string G1 = "Stop / target"
+float pipSize = input.float(0.1, "Pip size ($)", minval = 0.001, step = 0.01, tooltip = "Most gold brokers: 1 pip = $0.10. Some use $0.01.", group = G1)
+int slPips = input.int(100, "Stop loss (pips)", minval = 10, group = G1)
+int tpPips = input.int(300, "Take profit (pips)", minval = 10, group = G1)
+int maxHours = input.int(48, "Close after (hours)", minval = 1, group = G1)
+
+string G2 = "Entry rule"
+int emaLen = input.int(50, "Trend EMA (chart)", minval = 2, group = G2)
+int rsiLen = input.int(2, "RSI length", minval = 2, group = G2)
+float rsiLo = input.float(10, "Buy when RSI below", minval = 1, maxval = 50, group = G2)
+string htfTf = input.timeframe("240", "Higher-timeframe trend", group = G2)
+bool useHtf = input.bool(true, "Only trade with the higher-timeframe trend", group = G2)
+bool useSess = input.bool(true, "London + New York hours only (2 AM – noon NY)", group = G2)
+
+string G3 = "Display"
+color buyCol = input.color(#26a69a, "Buy", group = G3)
+color sellCol = input.color(#ef5350, "Sell", group = G3)
+
+// ───────── Signals ─────────
+float ema = ta.ema(close, emaLen)
+float rsi = ta.rsi(close, rsiLen)
+
+f_trend() =>
+    float e50 = ta.ema(close, 50)
+    float e200 = ta.ema(close, 200)
+    close > e50 and e50 > e200 ? 1 : close < e50 and e50 < e200 ? -1 : 0
+// Last completed higher-timeframe candle (no repainting).
+int htfDir = request.security(syminfo.tickerid, htfTf, f_trend()[1], lookahead = barmerge.lookahead_on)
+
+int nyHour = hour(time, "America/New_York")
+bool inSession = not useSess or (nyHour >= 2 and nyHour < 12)
+bool flat = strategy.position_size == 0
+
+bool longSig = barstate.isconfirmed and flat and inSession and close > ema and rsi < rsiLo and (not useHtf or htfDir == 1)
+bool shortSig = barstate.isconfirmed and flat and inSession and close < ema and rsi > 100 - rsiLo and (not useHtf or htfDir == -1)
+
+float sl = slPips * pipSize
+float tp = tpPips * pipSize
+
+if longSig
+    strategy.entry("Long", strategy.long)
+    alert("XAUUSD BUY (TK 100-pip) · entry ≈ " + str.tostring(close, format.mintick) + " · SL " + str.tostring(close - sl, format.mintick) + " (" + str.tostring(slPips) + " pips) · TP " + str.tostring(close + tp, format.mintick) + " (" + str.tostring(tpPips) + " pips)", alert.freq_once_per_bar_close)
+if shortSig
+    strategy.entry("Short", strategy.short)
+    alert("XAUUSD SELL (TK 100-pip) · entry ≈ " + str.tostring(close, format.mintick) + " · SL " + str.tostring(close + sl, format.mintick) + " (" + str.tostring(slPips) + " pips) · TP " + str.tostring(close - tp, format.mintick) + " (" + str.tostring(tpPips) + " pips)", alert.freq_once_per_bar_close)
+
+// Exits from the actual fill price.
+float entryPx = strategy.position_avg_price
+if strategy.position_size > 0
+    strategy.exit("Long exit", "Long", stop = entryPx - sl, limit = entryPx + tp)
+if strategy.position_size < 0
+    strategy.exit("Short exit", "Short", stop = entryPx + sl, limit = entryPx - tp)
+
+// Time limit.
+var int openedAt = na
+if strategy.position_size != 0 and strategy.position_size[1] == 0
+    openedAt := time
+if strategy.position_size == 0
+    openedAt := na
+if not na(openedAt) and time - openedAt >= maxHours * 3600000
+    strategy.close_all(comment = "Time limit")
+
+// ───────── Drawing: entry / SL / TP lines for the open trade ─────────
+var line lEntry = na
+var line lSl = na
+var line lTp = na
+var label lb = na
+if strategy.position_size != 0 and strategy.position_size[1] == 0
+    bool isLong = strategy.position_size > 0
+    float slPx = isLong ? entryPx - sl : entryPx + sl
+    float tpPx = isLong ? entryPx + tp : entryPx - tp
+    lEntry := line.new(bar_index, entryPx, bar_index + 1, entryPx, color = color.gray, width = 1)
+    lSl := line.new(bar_index, slPx, bar_index + 1, slPx, color = sellCol, width = 1, style = line.style_dashed)
+    lTp := line.new(bar_index, tpPx, bar_index + 1, tpPx, color = buyCol, width = 1, style = line.style_dashed)
+    lb := label.new(bar_index, isLong ? slPx : tpPx, (isLong ? "BUY " : "SELL ") + str.tostring(entryPx, format.mintick) + "\nSL " + str.tostring(slPx, format.mintick) + " · TP " + str.tostring(tpPx, format.mintick), style = isLong ? label.style_label_up : label.style_label_down, color = isLong ? buyCol : sellCol, textcolor = color.white, size = size.small)
+if strategy.position_size != 0 and not na(lEntry)
+    line.set_x2(lEntry, bar_index)
+    line.set_x2(lSl, bar_index)
+    line.set_x2(lTp, bar_index)
+
+plot(ema, "Trend EMA", color = color.new(color.orange, 30))
+plotshape(longSig, "Buy signal", shape.triangleup, location.belowbar, buyCol, size = size.small)
+plotshape(shortSig, "Sell signal", shape.triangledown, location.abovebar, sellCol, size = size.small)

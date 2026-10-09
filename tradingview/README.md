@@ -53,3 +53,17 @@ Create an alert on the indicator and choose **Any alert() function call**. It fi
 - Best on 1–15 minute charts. Macro windows only line up on low timeframes, and the HTF FVG timeframe should be above the chart timeframe.
 - Volume on forex/CFD gold is tick volume from the broker, so the volume check is approximate.
 - The checklist describes how textbook a setup is; it has **not been backtested** and a high score is not a guarantee. Educational use only — not financial advice.
+
+---
+
+# TradingKing · XAUUSD 100-pip strategy (TradingView strategy)
+
+File: [`tk-100pip-strategy.pine`](tk-100pip-strategy.pine) — the fixed **100-pip stop / 300-pip take profit** strategy from the Desk (gold pip = $0.10, so SL $10, TP $30).
+
+**Rule (Oct 2026 rule set, re-chosen quarterly by `scripts/research/fixed-sltp.js`):** on the 15-minute chart, during London + New York hours (2 AM – noon NY), buy when price is above the 50 EMA and RSI(2) drops below 10 — only if the last completed 4H candle is in an uptrend (close > EMA50 > EMA200). Sells are the mirror image. One trade at a time; exit at SL, TP or after 48 hours.
+
+**Install:** Pine Editor → paste → Save → *Add to chart* on XAUUSD 15m. Open the **Strategy Tester** tab to see how it did on your broker's prices.
+
+**Alerts with entry, SL and TP:** *Create alert* → condition: *TK 100-pip* → **"alert() function calls only"** → enable *Notify on app*. Each alert reads like: `XAUUSD BUY (TK 100-pip) · entry ≈ 4152.30 · SL 4142.30 (100 pips) · TP 4182.30 (300 pips)`.
+
+**Honest results** (walk-forward, $0.40 cost, 1% risk per trade): unseen 2023–25 **+102%** with a 28% max drawdown; **2026 +2%** (28% winners). A fixed $10 stop is tight for 2026 gold, where a 15-minute candle often moves $5–10 — risk 0.5% per trade or less. Not financial advice.

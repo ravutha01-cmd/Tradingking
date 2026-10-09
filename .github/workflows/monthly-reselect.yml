@@ -33,18 +33,22 @@ jobs:
       - name: Download / top up 5-minute data
         run: node scripts/research/fetch-5m.js
       - name: Re-choose rules
-        run: node --max-old-space-size=12000 scripts/research/adaptive.js
+        run: |
+          node --max-old-space-size=12000 scripts/research/adaptive.js
+          node --max-old-space-size=12000 scripts/research/fixed-sltp.js
       - name: Commit if changed
         run: |
           git config user.name "forward-test-bot"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
           cp js/intraday-data.js /tmp/intraday-data.js; cp data/research/adaptive.json /tmp/adaptive.json
+          cp js/sltp-data.js /tmp/sltp-data.js; cp data/research/fixed-sltp.json /tmp/fixed-sltp.json
           for attempt in 1 2 3; do
             git fetch -q origin "$GITHUB_REF_NAME"
             git reset -q --hard "origin/$GITHUB_REF_NAME"
             cp /tmp/intraday-data.js js/intraday-data.js; cp /tmp/adaptive.json data/research/adaptive.json
-            if git diff --quiet -- js/intraday-data.js data/research/adaptive.json; then echo "No changes."; exit 0; fi
-            git add js/intraday-data.js data/research/adaptive.json
+            cp /tmp/sltp-data.js js/sltp-data.js; cp /tmp/fixed-sltp.json data/research/fixed-sltp.json
+            if git diff --quiet -- js/intraday-data.js data/research/adaptive.json js/sltp-data.js data/research/fixed-sltp.json; then echo "No changes."; exit 0; fi
+            git add js/intraday-data.js data/research/adaptive.json js/sltp-data.js data/research/fixed-sltp.json
             git commit -q -m "Monthly re-selection: 5-a-day rules for $(date -u +%Y-%m)"
             if git push -q origin "HEAD:$GITHUB_REF_NAME"; then exit 0; fi
             echo "Push rejected (branch moved); retrying ($attempt)…"

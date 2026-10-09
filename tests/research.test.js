@@ -52,3 +52,14 @@ test('higher-timeframe trend uses only HTF candles that have closed', () => {
   // …but early candles, before 200 HTF candles exist, get no trend.
   assert.strictEqual(L.htfTrend([{ time: 10 * 3600e3 }], 15, H, 60)[0], 0);
 });
+
+test('fixed stop/target mode sets SL and TP from the fill price and ignores rule exits', () => {
+  const st = { prepare: (c) => ({ c }), entry: (ctx, i) => (i === 1 ? { dir: 1, stop: 50 } : null), exit: () => 'signal' };
+  const c = bars([[100, 101, 99, 100], [100, 101, 99, 100], [102, 103, 101, 102], [102, 110, 101, 109], [109, 110, 108, 109]]);
+  const [t] = L.backtest(c, st, {}, { cost: 0, fixed: { sl: 10, tp: 5 } });
+  assert.strictEqual(t.entry, 102);
+  assert.strictEqual(t.stop, 92);
+  assert.strictEqual(t.why, 'target');   // rule exit 'signal' ignored; target 107 hit on the next candle
+  assert.strictEqual(t.exit, 107);
+  assert.strictEqual(t.r, 0.5);
+});

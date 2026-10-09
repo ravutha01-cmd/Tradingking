@@ -63,8 +63,27 @@
     out.exposure = { longs, shorts, net: (longs - shorts) * D.riskPct, gross: out.open.length * D.riskPct };
     // Next decision point: the next 15-minute candle close.
     out.nextCheck = Math.ceil((now + 1) / 900e3) * 900e3;
+    last = { frames, price, now };
     return out;
   }
+
+  /* Run one rule with a fixed stop/target (price units) on the candles loaded by the last
+   * compute(): its open trade, a new signal on the latest closed candle, and recent trades. */
+  function ruleState(rule, fixed, cost) {
+    const R = root.Research;
+    if (!last) return null;
+    const c = last.frames[rule.tf], strat = R.STRATS[rule.id];
+    const trades = R.backtest(c, strat, rule.params, { cost, fixed, minRiskPct: 0 });
+    const t = trades.at(-1);
+    const open = t && t.why === 'end' ? t : null;
+    let pending = null;
+    if (!open) {
+      const sig = R.entrySignal(c, strat, rule.params, strat.prepare(c, rule.params), c.length - 1);
+      if (sig) pending = { dir: sig.dir, entry: last.price, stop: last.price - sig.dir * fixed.sl, target: last.price + sig.dir * fixed.tp, time: c.at(-1).time + rule.tf * 60e3 };
+    }
+    return { open, pending, price: last.price, recent: trades.filter((x) => x.why !== 'end').slice(-8).reverse() };
+  }
+  let last = null;
 
   // Multi-timeframe bias from Binance klines (15m … weekly).
   async function bias() {
@@ -79,5 +98,5 @@
     });
   }
 
-  root.Engine = { compute, bias };
+  root.Engine = { compute, bias, ruleState };
 })(window);

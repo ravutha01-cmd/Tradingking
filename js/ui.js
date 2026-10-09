@@ -76,7 +76,8 @@
 
   // ───────── Position sizing ─────────
   const SKEY = 'tradingking.sizing';
-  const DEFAULTS = { balance: 10000, riskPct: 0.25, ozPerLot: 100, spread: 0.3 };
+  const DEFAULTS = { balance: 10000, riskPct: 0.25, ozPerLot: 100, spread: 0.3, pip: 0.1 };
+  const pips = (usd) => Math.round(Math.abs(usd) / (sizing().pip || 0.1));
   function sizing() { try { return { ...DEFAULTS, ...JSON.parse(localStorage.getItem(SKEY)) }; } catch { return { ...DEFAULTS }; } }
   function saveSizing(s) { try { localStorage.setItem(SKEY, JSON.stringify(s)); } catch { /* storage unavailable */ } }
   // Lots so that a stop-out (plus spread) loses riskPct of the balance.
@@ -91,7 +92,7 @@
     const z = size(entry, stop);
     const rr = target != null ? Math.abs(target - entry) / Math.max(z.dist, 1e-9) : null;
     return z.lots > 0
-      ? `<b>${z.lots.toFixed(2)} lot</b> · $${fmt(z.riskUsd, 0)} at risk · stop $${fmt(z.dist)} away${rr ? ` · R:R 1:${rr.toFixed(1)}` : ''}`
+      ? `<b>${z.lots.toFixed(2)} lot</b> · $${fmt(z.riskUsd, 0)} at risk · SL ${pips(z.dist)} pips${target != null ? ` · TP ${pips(target - entry)} pips` : ''}${rr ? ` · R:R 1:${rr.toFixed(1)}` : ''}`
       : `Stop too wide for your risk — position below 0.01 lot`;
   };
 
@@ -117,5 +118,5 @@
     setInterval(renderNews, 30000);
   }
 
-  root.UI = { $, fmt, pct, sR, cls, arrow, tag, side, when, clock, tz, ago, tfName, legName, exitRule, WHY, nav, shell, newsState, upcoming, countdown, renderNews, sizing, saveSizing, size, sizeLine, beep, notify, setStatus, age };
+  root.UI = { pips, $, fmt, pct, sR, cls, arrow, tag, side, when, clock, tz, ago, tfName, legName, exitRule, WHY, nav, shell, newsState, upcoming, countdown, renderNews, sizing, saveSizing, size, sizeLine, beep, notify, setStatus, age };
 })(window);
