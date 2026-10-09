@@ -101,7 +101,7 @@
   }
  ],
  "summary": {
-  "updated": "2026-10-09T17:32:04.614Z",
+  "updated": "2026-10-09T21:51:45.396Z",
   "signals": 6,
   "open": 0,
   "closed": 6,
@@ -109,7 +109,7 @@
   "totalR": -1.32,
   "returnPct": -0.33,
   "maxDDPct": 0.51,
-  "perDay": 4.85
+  "perDay": 4.4
  },
  "registry": {
   "60-pullback-eyJsZW4iOjIsImxvIjoyNSwi": {
