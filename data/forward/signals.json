@@ -82,18 +82,30 @@
    "exit": 4181.82,
    "why": "stop",
    "r": -1.009
+  },
+  {
+   "key": "15-pullback-eyJsZW4iOjIsImxvIjoxMCwi-1791542700000-1",
+   "rule_key": "15-pullback-eyJsZW4iOjIsImxvIjoxMCwi",
+   "rule": "15m Trend pullback (RSI)",
+   "side": "BUY",
+   "entryTime": "2026-10-09T10:45:00.000Z",
+   "firstSeen": "2026-10-09T11:32:14.419Z",
+   "entry": 4181.03,
+   "stop": 4174.04,
+   "target": null,
+   "status": "open"
   }
  ],
  "summary": {
-  "updated": "2026-10-09T06:20:32.594Z",
-  "signals": 5,
-  "open": 0,
+  "updated": "2026-10-09T11:32:14.419Z",
+  "signals": 6,
+  "open": 1,
   "closed": 5,
   "winRate": 0.4,
   "totalR": -1.765,
   "returnPct": -0.44,
   "maxDDPct": 0.51,
-  "perDay": 5
+  "perDay": 5.67
  },
  "registry": {
   "60-pullback-eyJsZW4iOjIsImxvIjoyNSwi": {
