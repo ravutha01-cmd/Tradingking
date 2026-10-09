@@ -77,18 +77,22 @@
    "entry": 4136.91,
    "stop": 4181.82,
    "target": null,
-   "status": "open"
+   "status": "closed",
+   "exitTime": "2026-10-09T04:00:00.000Z",
+   "exit": 4181.82,
+   "why": "stop",
+   "r": -1.009
   }
  ],
  "summary": {
-  "updated": "2026-10-09T00:15:01.189Z",
+  "updated": "2026-10-09T06:20:32.594Z",
   "signals": 5,
-  "open": 1,
-  "closed": 4,
-  "winRate": 0.5,
-  "totalR": -0.756,
-  "returnPct": -0.19,
-  "maxDDPct": 0.25,
+  "open": 0,
+  "closed": 5,
+  "winRate": 0.4,
+  "totalR": -1.765,
+  "returnPct": -0.44,
+  "maxDDPct": 0.51,
   "perDay": 5
  },
  "registry": {
