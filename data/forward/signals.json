@@ -93,19 +93,23 @@
    "entry": 4181.03,
    "stop": 4174.04,
    "target": null,
-   "status": "open"
+   "status": "closed",
+   "exitTime": "2026-10-09T11:30:00.000Z",
+   "exit": 4184.54,
+   "why": "signal",
+   "r": 0.445
   }
  ],
  "summary": {
-  "updated": "2026-10-09T11:32:14.419Z",
+  "updated": "2026-10-09T17:32:04.614Z",
   "signals": 6,
-  "open": 1,
-  "closed": 5,
-  "winRate": 0.4,
-  "totalR": -1.765,
-  "returnPct": -0.44,
+  "open": 0,
+  "closed": 6,
+  "winRate": 0.5,
+  "totalR": -1.32,
+  "returnPct": -0.33,
   "maxDDPct": 0.51,
-  "perDay": 5.67
+  "perDay": 4.85
  },
  "registry": {
   "60-pullback-eyJsZW4iOjIsImxvIjoyNSwi": {
