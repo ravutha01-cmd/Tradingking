@@ -336,6 +336,10 @@
   let resizeTimer;
   window.addEventListener('resize', () => { clearTimeout(resizeTimer); resizeTimer = setTimeout(renderBacktest, 200); });
 
+  // Show the current price straight away; the full history download can take a while.
+  fetch('https://data-api.binance.vision/api/v3/ticker/price?symbol=PAXGUSDT')
+    .then((r) => r.json()).then((t) => { if (!candles.length) $('price').textContent = fmt(+t.price); })
+    .catch(() => { /* the history sync will fill it in */ });
   setHourly(History.load('1h'));
   if (candles.length) refreshAll();
   showBuiltIn();
