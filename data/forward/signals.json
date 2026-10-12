@@ -137,7 +137,11 @@
    "entry": 4173.9,
    "stop": 4186.8,
    "target": null,
-   "status": "open"
+   "status": "closed",
+   "exitTime": "2026-10-12T21:00:00.000Z",
+   "exit": 4174.27,
+   "why": "signal",
+   "r": -0.06
   },
   {
    "key": "60-donchian-eyJuIjoyMCwibSI6MTAsImF0-1791799200000--1",
@@ -161,7 +165,11 @@
    "entry": 4167.49,
    "stop": 4187.97,
    "target": null,
-   "status": "open"
+   "status": "closed",
+   "exitTime": "2026-10-12T21:00:00.000Z",
+   "exit": 4174.27,
+   "why": "signal",
+   "r": -0.351
   },
   {
    "key": "15-pullback-eyJsZW4iOjIsImxvIjoxMCwi-1791811800000--1",
@@ -178,18 +186,58 @@
    "exit": 4170,
    "why": "signal",
    "r": 0.421
+  },
+  {
+   "key": "240-ema-eyJmYXN0IjoxMCwic2xvdyI6-1791824400000--1",
+   "rule_key": "240-ema-eyJmYXN0IjoxMCwic2xvdyI6",
+   "rule": "4H EMA crossover trend",
+   "side": "SELL",
+   "entryTime": "2026-10-12T17:00:00.000Z",
+   "firstSeen": "2026-10-12T23:50:06.938Z",
+   "entry": 4166.43,
+   "stop": 4214.39,
+   "target": null,
+   "status": "open"
+  },
+  {
+   "key": "60-pullback-eyJsZW4iOjIsImxvIjoyNSwi-1791828000000--1",
+   "rule_key": "60-pullback-eyJsZW4iOjIsImxvIjoyNSwi",
+   "rule": "1H Trend pullback (RSI)",
+   "side": "SELL",
+   "entryTime": "2026-10-12T18:00:00.000Z",
+   "firstSeen": "2026-10-12T23:50:06.938Z",
+   "entry": 4171.86,
+   "stop": 4203,
+   "target": null,
+   "status": "open"
+  },
+  {
+   "key": "30-pullback-eyJsZW4iOjIsImxvIjoxMCwi-1791828000000--1",
+   "rule_key": "30-pullback-eyJsZW4iOjIsImxvIjoxMCwi",
+   "rule": "30m Trend pullback (RSI)",
+   "side": "SELL",
+   "entryTime": "2026-10-12T18:00:00.000Z",
+   "firstSeen": "2026-10-12T23:50:06.938Z",
+   "entry": 4171.86,
+   "stop": 4192.84,
+   "target": null,
+   "status": "closed",
+   "exitTime": "2026-10-12T19:30:00.000Z",
+   "exit": 4169.59,
+   "why": "signal",
+   "r": 0.089
   }
  ],
  "summary": {
-  "updated": "2026-10-12T17:49:43.842Z",
-  "signals": 12,
+  "updated": "2026-10-12T23:50:06.938Z",
+  "signals": 15,
   "open": 4,
-  "closed": 8,
-  "winRate": 0.5,
-  "totalR": -1.907,
-  "returnPct": -0.48,
+  "closed": 11,
+  "winRate": 0.45454545454545453,
+  "totalR": -2.229,
+  "returnPct": -0.56,
   "maxDDPct": 0.65,
-  "perDay": 3.54
+  "perDay": 4.21
  },
  "registry": {
   "60-pullback-eyJsZW4iOjIsImxvIjoyNSwi": {
