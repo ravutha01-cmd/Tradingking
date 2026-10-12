@@ -98,18 +98,42 @@
    "exit": 4184.54,
    "why": "signal",
    "r": 0.445
+  },
+  {
+   "key": "240-donchian-eyJuIjoyMCwibSI6MTAsImF0-1791766800000-1",
+   "rule_key": "240-donchian-eyJuIjoyMCwibSI6MTAsImF0",
+   "rule": "4H Donchian breakout",
+   "side": "BUY",
+   "entryTime": "2026-10-12T01:00:00.000Z",
+   "firstSeen": "2026-10-12T08:06:16.375Z",
+   "entry": 4205.69,
+   "stop": 4129.7,
+   "target": null,
+   "status": "open"
+  },
+  {
+   "key": "240-ema-eyJmYXN0IjoxMCwic2xvdyI6-1791766800000-1",
+   "rule_key": "240-ema-eyJmYXN0IjoxMCwic2xvdyI6",
+   "rule": "4H EMA crossover trend",
+   "side": "BUY",
+   "entryTime": "2026-10-12T01:00:00.000Z",
+   "firstSeen": "2026-10-12T08:06:16.375Z",
+   "entry": 4205.69,
+   "stop": 4155.14,
+   "target": null,
+   "status": "open"
   }
  ],
  "summary": {
-  "updated": "2026-10-12T01:42:22.335Z",
-  "signals": 6,
-  "open": 0,
+  "updated": "2026-10-12T08:06:16.375Z",
+  "signals": 8,
+  "open": 2,
   "closed": 6,
   "winRate": 0.5,
   "totalR": -1.32,
   "returnPct": -0.33,
   "maxDDPct": 0.51,
-  "perDay": 2.06
+  "perDay": 2.58
  },
  "registry": {
   "60-pullback-eyJsZW4iOjIsImxvIjoyNSwi": {
