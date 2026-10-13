@@ -302,18 +302,42 @@
    "exit": 4189.22,
    "why": "signal",
    "r": 0.385
+  },
+  {
+   "key": "60-pullback-eyJsZW4iOjIsImxvIjoyNSwi-1791921600000--1",
+   "rule_key": "60-pullback-eyJsZW4iOjIsImxvIjoyNSwi",
+   "rule": "1H Trend pullback (RSI)",
+   "side": "SELL",
+   "entryTime": "2026-10-13T20:00:00.000Z",
+   "firstSeen": "2026-10-13T23:05:10.588Z",
+   "entry": 4166.85,
+   "stop": 4198.86,
+   "target": null,
+   "status": "open"
+  },
+  {
+   "key": "240-ema-eyJmYXN0IjoxMCwic2xvdyI6-1791925200000--1",
+   "rule_key": "240-ema-eyJmYXN0IjoxMCwic2xvdyI6",
+   "rule": "4H EMA crossover trend",
+   "side": "SELL",
+   "entryTime": "2026-10-13T21:00:00.000Z",
+   "firstSeen": "2026-10-13T23:05:10.588Z",
+   "entry": 4163.94,
+   "stop": 4208.92,
+   "target": null,
+   "status": "open"
   }
  ],
  "summary": {
-  "updated": "2026-10-13T18:32:02.028Z",
-  "signals": 19,
-  "open": 1,
+  "updated": "2026-10-13T23:05:10.588Z",
+  "signals": 21,
+  "open": 3,
   "closed": 18,
   "winRate": 0.4444444444444444,
   "totalR": -3.659,
   "returnPct": -0.91,
   "maxDDPct": 0.98,
-  "perDay": 4.61
+  "perDay": 4.93
  },
  "registry": {
   "60-pullback-eyJsZW4iOjIsImxvIjoyNSwi": {
