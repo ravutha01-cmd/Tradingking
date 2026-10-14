@@ -313,7 +313,11 @@
    "entry": 4166.85,
    "stop": 4198.86,
    "target": null,
-   "status": "open"
+   "status": "closed",
+   "exitTime": "2026-10-14T00:00:00.000Z",
+   "exit": 4159.87,
+   "why": "signal",
+   "r": 0.206
   },
   {
    "key": "240-ema-eyJmYXN0IjoxMCwic2xvdyI6-1791925200000--1",
@@ -329,15 +333,15 @@
   }
  ],
  "summary": {
-  "updated": "2026-10-13T23:05:10.588Z",
+  "updated": "2026-10-14T01:51:00.480Z",
   "signals": 21,
-  "open": 3,
-  "closed": 18,
-  "winRate": 0.4444444444444444,
-  "totalR": -3.659,
-  "returnPct": -0.91,
+  "open": 2,
+  "closed": 19,
+  "winRate": 0.47368421052631576,
+  "totalR": -3.453,
+  "returnPct": -0.86,
   "maxDDPct": 0.98,
-  "perDay": 4.93
+  "perDay": 4.84
  },
  "registry": {
   "60-pullback-eyJsZW4iOjIsImxvIjoyNSwi": {
