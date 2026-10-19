@@ -653,7 +653,11 @@
    "entry": 4170.93,
    "stop": 4122.77,
    "target": null,
-   "status": "open"
+   "status": "closed",
+   "exitTime": "2026-10-19T17:00:00.000Z",
+   "exit": 4141.42,
+   "why": "signal",
+   "r": -0.552
   },
   {
    "key": "30-orb-eyJzdG9wIjoibWlkIiwidHAi-1792395000000-1",
@@ -725,15 +729,15 @@
   }
  ],
  "summary": {
-  "updated": "2026-10-19T17:12:35.057Z",
+  "updated": "2026-10-19T21:35:50.817Z",
   "signals": 46,
-  "open": 4,
-  "closed": 42,
-  "winRate": 0.5952380952380952,
-  "totalR": 16.463,
-  "returnPct": 4.17,
+  "open": 3,
+  "closed": 43,
+  "winRate": 0.5813953488372093,
+  "totalR": 15.911,
+  "returnPct": 4.03,
   "maxDDPct": 0.98,
-  "perDay": 5.5
+  "perDay": 5.41
  },
  "registry": {
   "60-pullback-eyJsZW4iOjIsImxvIjoyNSwi": {
