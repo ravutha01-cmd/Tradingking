@@ -642,18 +642,30 @@
    "exit": 4177.38,
    "why": "signal",
    "r": 0.248
+  },
+  {
+   "key": "240-ema-eyJmYXN0IjoxMCwic2xvdyI6-1792371600000-1",
+   "rule_key": "240-ema-eyJmYXN0IjoxMCwic2xvdyI6",
+   "rule": "4H EMA crossover trend",
+   "side": "BUY",
+   "entryTime": "2026-10-19T01:00:00.000Z",
+   "firstSeen": "2026-10-19T04:53:43.440Z",
+   "entry": 4170.93,
+   "stop": 4122.77,
+   "target": null,
+   "status": "open"
   }
  ],
  "summary": {
-  "updated": "2026-10-19T00:09:00.417Z",
-  "signals": 40,
-  "open": 0,
+  "updated": "2026-10-19T04:53:43.440Z",
+  "signals": 41,
+  "open": 1,
   "closed": 40,
   "winRate": 0.625,
   "totalR": 18.549,
   "returnPct": 4.72,
   "maxDDPct": 0.98,
-  "perDay": 5.09
+  "perDay": 5.12
  },
  "registry": {
   "60-pullback-eyJsZW4iOjIsImxvIjoyNSwi": {
