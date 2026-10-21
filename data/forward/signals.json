@@ -930,12 +930,24 @@
    "exit": 4126.66,
    "why": "signal",
    "r": 0.222
+  },
+  {
+   "key": "60-pullback-eyJsZW4iOjIsImxvIjoyNSwi-1792569600000--1",
+   "rule_key": "60-pullback-eyJsZW4iOjIsImxvIjoyNSwi",
+   "rule": "1H Trend pullback (RSI)",
+   "side": "SELL",
+   "entryTime": "2026-10-21T08:00:00.000Z",
+   "firstSeen": "2026-10-21T11:39:09.881Z",
+   "entry": 4130.26,
+   "stop": 4162.99,
+   "target": null,
+   "status": "open"
   }
  ],
  "summary": {
-  "updated": "2026-10-21T05:56:36.396Z",
-  "signals": 58,
-  "open": 0,
+  "updated": "2026-10-21T11:39:09.881Z",
+  "signals": 59,
+  "open": 1,
   "closed": 58,
   "winRate": 0.5517241379310345,
   "totalR": 11.679,
