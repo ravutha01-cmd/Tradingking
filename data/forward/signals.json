@@ -1018,18 +1018,54 @@
    "stop": 4174.83,
    "target": null,
    "status": "open"
+  },
+  {
+   "key": "30-orb-eyJzdG9wIjoibWlkIiwidHAi-1792656000000--1",
+   "rule_key": "30-orb-eyJzdG9wIjoibWlkIiwidHAi",
+   "rule": "30m Asia range breakout",
+   "side": "SELL",
+   "entryTime": "2026-10-22T08:00:00.000Z",
+   "firstSeen": "2026-10-22T12:31:47.391Z",
+   "entry": 4096.96,
+   "stop": 4113.53,
+   "target": 4035.72,
+   "status": "open"
+  },
+  {
+   "key": "15-orb-eyJzdG9wIjoibWlkIiwidHAi-1792656000000--1",
+   "rule_key": "15-orb-eyJzdG9wIjoibWlkIiwidHAi",
+   "rule": "15m Asia range breakout",
+   "side": "SELL",
+   "entryTime": "2026-10-22T08:00:00.000Z",
+   "firstSeen": "2026-10-22T12:31:47.391Z",
+   "entry": 4096.96,
+   "stop": 4113.53,
+   "target": 4035.72,
+   "status": "open"
+  },
+  {
+   "key": "15-donchian-eyJuIjo1NSwibSI6MjAsImF0-1792668600000--1",
+   "rule_key": "15-donchian-eyJuIjo1NSwibSI6MjAsImF0",
+   "rule": "15m Donchian breakout",
+   "side": "SELL",
+   "entryTime": "2026-10-22T11:30:00.000Z",
+   "firstSeen": "2026-10-22T12:31:47.391Z",
+   "entry": 4074.93,
+   "stop": 4095.62,
+   "target": null,
+   "status": "open"
   }
  ],
  "summary": {
-  "updated": "2026-10-22T06:39:13.356Z",
-  "signals": 64,
-  "open": 2,
+  "updated": "2026-10-22T12:31:47.391Z",
+  "signals": 67,
+  "open": 5,
   "closed": 62,
   "winRate": 0.5645161290322581,
   "totalR": 13.364,
   "returnPct": 3.36,
   "maxDDPct": 2.08,
-  "perDay": 6.28
+  "perDay": 6.46
  },
  "registry": {
   "60-pullback-eyJsZW4iOjIsImxvIjoyNSwi": {
