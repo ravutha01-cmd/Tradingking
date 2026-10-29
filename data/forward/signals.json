@@ -1529,7 +1529,11 @@
    "entry": 4030.85,
    "stop": 4052.39,
    "target": 3970.91,
-   "status": "open"
+   "status": "closed",
+   "exitTime": "2026-10-29T20:00:00.000Z",
+   "exit": 4027.28,
+   "why": "eod",
+   "r": 0.147
   },
   {
    "key": "30-orb-eyJzdG9wIjoibWlkIiwidHAi-1793255400000--1",
@@ -1541,7 +1545,11 @@
    "entry": 4030.96,
    "stop": 4052.39,
    "target": 3971.67,
-   "status": "open"
+   "status": "closed",
+   "exitTime": "2026-10-29T20:00:00.000Z",
+   "exit": 4027.28,
+   "why": "eod",
+   "r": 0.153
   },
   {
    "key": "60-donchian-eyJuIjoyMCwibSI6MTAsImF0-1793260800000--1",
@@ -1598,18 +1606,50 @@
    "exit": 4025.57,
    "why": "signal",
    "r": 0.398
+  },
+  {
+   "key": "60-pullback-eyJsZW4iOjIsImxvIjoyNSwi-1793304000000--1",
+   "rule_key": "60-pullback-eyJsZW4iOjIsImxvIjoyNSwi",
+   "rule": "1H Trend pullback (RSI)",
+   "side": "SELL",
+   "entryTime": "2026-10-29T20:00:00.000Z",
+   "firstSeen": "2026-10-29T23:23:24.792Z",
+   "entry": 4027.28,
+   "stop": 4066.12,
+   "target": null,
+   "status": "closed",
+   "exitTime": "2026-10-29T22:00:00.000Z",
+   "exit": 4019.58,
+   "why": "signal",
+   "r": 0.188
+  },
+  {
+   "key": "30-pullback-eyJsZW4iOjIsImxvIjoxMCwi-1793304000000--1",
+   "rule_key": "30-pullback-eyJsZW4iOjIsImxvIjoxMCwi",
+   "rule": "30m Trend pullback (RSI)",
+   "side": "SELL",
+   "entryTime": "2026-10-29T20:00:00.000Z",
+   "firstSeen": "2026-10-29T23:23:24.792Z",
+   "entry": 4027.28,
+   "stop": 4052.75,
+   "target": null,
+   "status": "closed",
+   "exitTime": "2026-10-29T21:30:00.000Z",
+   "exit": 4021.01,
+   "why": "signal",
+   "r": 0.23
   }
  ],
  "summary": {
-  "updated": "2026-10-29T19:17:35.090Z",
-  "signals": 101,
-  "open": 5,
-  "closed": 96,
-  "winRate": 0.5625,
-  "totalR": 19.897,
-  "returnPct": 5.05,
+  "updated": "2026-10-29T23:23:24.792Z",
+  "signals": 103,
+  "open": 3,
+  "closed": 100,
+  "winRate": 0.58,
+  "totalR": 20.615,
+  "returnPct": 5.24,
   "maxDDPct": 2.16,
-  "perDay": 6.49
+  "perDay": 6.56
  },
  "registry": {
   "60-pullback-eyJsZW4iOjIsImxvIjoyNSwi": {
