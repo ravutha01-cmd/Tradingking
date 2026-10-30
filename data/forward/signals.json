@@ -1638,18 +1638,34 @@
    "exit": 4021.01,
    "why": "signal",
    "r": 0.23
+  },
+  {
+   "key": "60-pullback-eyJsZW4iOjIsImxvIjoyNSwi-1793314800000--1",
+   "rule_key": "60-pullback-eyJsZW4iOjIsImxvIjoyNSwi",
+   "rule": "1H Trend pullback (RSI)",
+   "side": "SELL",
+   "entryTime": "2026-10-29T23:00:00.000Z",
+   "firstSeen": "2026-10-30T02:52:33.437Z",
+   "entry": 4027.08,
+   "stop": 4067.54,
+   "target": null,
+   "status": "closed",
+   "exitTime": "2026-10-30T00:00:00.000Z",
+   "exit": 4014.38,
+   "why": "signal",
+   "r": 0.304
   }
  ],
  "summary": {
-  "updated": "2026-10-29T23:23:24.792Z",
-  "signals": 103,
+  "updated": "2026-10-30T02:52:33.437Z",
+  "signals": 104,
   "open": 3,
-  "closed": 100,
-  "winRate": 0.58,
-  "totalR": 20.615,
-  "returnPct": 5.24,
+  "closed": 101,
+  "winRate": 0.5841584158415841,
+  "totalR": 20.919,
+  "returnPct": 5.32,
   "maxDDPct": 2.16,
-  "perDay": 6.56
+  "perDay": 6.58
  },
  "registry": {
   "60-pullback-eyJsZW4iOjIsImxvIjoyNSwi": {
