@@ -1929,7 +1929,11 @@
    "entry": 3940.99,
    "stop": 3982.57,
    "target": null,
-   "status": "open"
+   "status": "closed",
+   "exitTime": "2026-11-03T17:00:00.000Z",
+   "exit": 3934.6,
+   "why": "signal",
+   "r": 0.144
   },
   {
    "key": "15-pullback-eyJsZW4iOjIsImxvIjoxMCwi-1793718900000-1",
@@ -1941,19 +1945,23 @@
    "entry": 3941.67,
    "stop": 3929.19,
    "target": null,
-   "status": "open"
+   "status": "closed",
+   "exitTime": "2026-11-03T18:00:00.000Z",
+   "exit": 3939.33,
+   "why": "signal",
+   "r": -0.22
   }
  ],
  "summary": {
-  "updated": "2026-11-03T16:07:11.901Z",
+  "updated": "2026-11-03T21:50:56.063Z",
   "signals": 122,
-  "open": 3,
-  "closed": 119,
-  "winRate": 0.5882352941176471,
-  "totalR": 35.42,
-  "returnPct": 9.18,
+  "open": 1,
+  "closed": 121,
+  "winRate": 0.5867768595041323,
+  "totalR": 35.344,
+  "returnPct": 9.16,
   "maxDDPct": 2.16,
-  "perDay": 6.4
+  "perDay": 6.35
  },
  "registry": {
   "60-pullback-eyJsZW4iOjIsImxvIjoyNSwi": {
