@@ -2189,7 +2189,11 @@
    "entry": 4044.2,
    "stop": 4089.79,
    "target": null,
-   "status": "open"
+   "status": "closed",
+   "exitTime": "2026-11-11T06:00:00.000Z",
+   "exit": 4051.98,
+   "why": "signal",
+   "r": -0.179
   },
   {
    "key": "15-donchian-eyJuIjo1NSwibSI6MjAsImF0-1794328200000--1",
@@ -2257,19 +2261,23 @@
    "entry": 4033.95,
    "stop": 4059.31,
    "target": null,
-   "status": "open"
+   "status": "closed",
+   "exitTime": "2026-11-11T01:00:00.000Z",
+   "exit": 4025.95,
+   "why": "signal",
+   "r": 0.3
   }
  ],
  "summary": {
-  "updated": "2026-11-11T01:27:30.524Z",
+  "updated": "2026-11-11T08:18:34.020Z",
   "signals": 142,
-  "open": 4,
-  "closed": 138,
-  "winRate": 0.5434782608695652,
-  "totalR": 29.553,
-  "returnPct": 7.58,
+  "open": 2,
+  "closed": 140,
+  "winRate": 0.5428571428571428,
+  "totalR": 29.674,
+  "returnPct": 7.62,
   "maxDDPct": 3.14,
-  "perDay": 5.84
+  "perDay": 5.79
  },
  "registry": {
   "60-pullback-eyJsZW4iOjIsImxvIjoyNSwi": {
