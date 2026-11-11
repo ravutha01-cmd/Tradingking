@@ -2249,7 +2249,11 @@
    "entry": 4028.84,
    "stop": 4072.69,
    "target": null,
-   "status": "open"
+   "status": "closed",
+   "exitTime": "2026-11-11T10:00:00.000Z",
+   "exit": 4040.49,
+   "why": "signal",
+   "r": -0.275
   },
   {
    "key": "30-pullback-eyJsZW4iOjIsImxvIjoxMCwi-1794355200000--1",
@@ -2266,18 +2270,70 @@
    "exit": 4025.95,
    "why": "signal",
    "r": 0.3
+  },
+  {
+   "key": "15-pullback-eyJsZW4iOjIsImxvIjoxMCwi-1794385800000-1",
+   "rule_key": "15-pullback-eyJsZW4iOjIsImxvIjoxMCwi",
+   "rule": "15m Trend pullback (RSI)",
+   "side": "BUY",
+   "entryTime": "2026-11-11T08:30:00.000Z",
+   "firstSeen": "2026-11-11T16:20:25.235Z",
+   "entry": 4047.48,
+   "stop": 4040.3,
+   "target": null,
+   "status": "closed",
+   "exitTime": "2026-11-11T09:15:00.000Z",
+   "exit": 4040.3,
+   "why": "stop",
+   "r": -1.056
+  },
+  {
+   "key": "240-ema-eyJmYXN0IjoxMCwic2xvdyI6-1794405600000--1",
+   "rule_key": "240-ema-eyJmYXN0IjoxMCwic2xvdyI6",
+   "rule": "4H EMA crossover trend",
+   "side": "SELL",
+   "entryTime": "2026-11-11T14:00:00.000Z",
+   "firstSeen": "2026-11-11T16:20:25.235Z",
+   "entry": 4028.88,
+   "stop": 4066.92,
+   "target": null,
+   "status": "open"
+  },
+  {
+   "key": "15-donchian-eyJuIjo1NSwibSI6MjAsImF0-1794408300000--1",
+   "rule_key": "15-donchian-eyJuIjo1NSwibSI6MjAsImF0",
+   "rule": "15m Donchian breakout",
+   "side": "SELL",
+   "entryTime": "2026-11-11T14:45:00.000Z",
+   "firstSeen": "2026-11-11T16:20:25.235Z",
+   "entry": 4007.79,
+   "stop": 4025.03,
+   "target": null,
+   "status": "open"
+  },
+  {
+   "key": "60-donchian-eyJuIjoyMCwibSI6MTAsImF0-1794409200000--1",
+   "rule_key": "60-donchian-eyJuIjoyMCwibSI6MTAsImF0",
+   "rule": "1H Donchian breakout",
+   "side": "SELL",
+   "entryTime": "2026-11-11T15:00:00.000Z",
+   "firstSeen": "2026-11-11T16:20:25.235Z",
+   "entry": 4008.89,
+   "stop": 4046.2,
+   "target": null,
+   "status": "open"
   }
  ],
  "summary": {
-  "updated": "2026-11-11T08:18:34.020Z",
-  "signals": 142,
-  "open": 2,
-  "closed": 140,
-  "winRate": 0.5428571428571428,
-  "totalR": 29.674,
-  "returnPct": 7.62,
-  "maxDDPct": 3.14,
-  "perDay": 5.79
+  "updated": "2026-11-11T16:20:25.235Z",
+  "signals": 146,
+  "open": 4,
+  "closed": 142,
+  "winRate": 0.5352112676056338,
+  "totalR": 28.343,
+  "returnPct": 7.26,
+  "maxDDPct": 3.43,
+  "perDay": 5.89
  },
  "registry": {
   "60-pullback-eyJsZW4iOjIsImxvIjoyNSwi": {
