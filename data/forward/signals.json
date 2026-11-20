@@ -3121,7 +3121,11 @@
    "entry": 3558,
    "stop": 3639.61,
    "target": null,
-   "status": "open"
+   "status": "closed",
+   "exitTime": "2026-11-20T16:00:00.000Z",
+   "exit": 3546.49,
+   "why": "signal",
+   "r": 0.136
   },
   {
    "key": "30-pullback-eyJsZW4iOjIsImxvIjoxMCwi-1795163400000--1",
@@ -3138,16 +3142,28 @@
    "exit": 3562.74,
    "why": "signal",
    "r": 0.318
+  },
+  {
+   "key": "30-donchian-eyJuIjo1NSwibSI6MTAsImF0-1795199400000--1",
+   "rule_key": "30-donchian-eyJuIjo1NSwibSI6MTAsImF0",
+   "rule": "30m Donchian breakout",
+   "side": "SELL",
+   "entryTime": "2026-11-20T18:30:00.000Z",
+   "firstSeen": "2026-11-20T22:47:29.179Z",
+   "entry": 3510.97,
+   "stop": 3572.37,
+   "target": null,
+   "status": "open"
   }
  ],
  "summary": {
-  "updated": "2026-11-20T16:26:03.467Z",
-  "signals": 197,
+  "updated": "2026-11-20T22:47:29.179Z",
+  "signals": 198,
   "open": 4,
-  "closed": 193,
-  "winRate": 0.6010362694300518,
-  "totalR": 61.274,
-  "returnPct": 16.43,
+  "closed": 194,
+  "winRate": 0.6030927835051546,
+  "totalR": 61.41,
+  "returnPct": 16.47,
   "maxDDPct": 3.43,
   "perDay": 6.31
  },
