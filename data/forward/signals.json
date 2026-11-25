@@ -3409,19 +3409,47 @@
    "entry": 3554.92,
    "stop": 3587.29,
    "target": null,
+   "status": "closed",
+   "exitTime": "2026-11-25T00:00:00.000Z",
+   "exit": 3547.61,
+   "why": "signal",
+   "r": 0.213
+  },
+  {
+   "key": "15-orb-eyJzdG9wIjoibWlkIiwidHAi-1795590900000--1",
+   "rule_key": "15-orb-eyJzdG9wIjoibWlkIiwidHAi",
+   "rule": "15m Asia range breakout",
+   "side": "SELL",
+   "entryTime": "2026-11-25T07:15:00.000Z",
+   "firstSeen": "2026-11-25T08:19:50.482Z",
+   "entry": 3516.61,
+   "stop": 3549.59,
+   "target": 3440.39,
+   "status": "open"
+  },
+  {
+   "key": "30-orb-eyJzdG9wIjoibWlkIiwidHAi-1795591800000--1",
+   "rule_key": "30-orb-eyJzdG9wIjoibWlkIiwidHAi",
+   "rule": "30m Asia range breakout",
+   "side": "SELL",
+   "entryTime": "2026-11-25T07:30:00.000Z",
+   "firstSeen": "2026-11-25T08:19:50.482Z",
+   "entry": 3519.34,
+   "stop": 3549.59,
+   "target": 3441.78,
    "status": "open"
   }
  ],
  "summary": {
-  "updated": "2026-11-25T00:04:08.872Z",
-  "signals": 214,
-  "open": 4,
-  "closed": 210,
-  "winRate": 0.6,
-  "totalR": 73.308,
-  "returnPct": 19.96,
+  "updated": "2026-11-25T08:19:50.482Z",
+  "signals": 216,
+  "open": 5,
+  "closed": 211,
+  "winRate": 0.6018957345971564,
+  "totalR": 73.521,
+  "returnPct": 20.02,
   "maxDDPct": 3.43,
-  "perDay": 6.24
+  "perDay": 6.25
  },
  "registry": {
   "60-pullback-eyJsZW4iOjIsImxvIjoyNSwi": {
