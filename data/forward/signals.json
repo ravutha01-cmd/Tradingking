@@ -3385,7 +3385,11 @@
    "entry": 3583.9,
    "stop": 3627.97,
    "target": null,
-   "status": "open"
+   "status": "closed",
+   "exitTime": "2026-11-25T18:30:00.000Z",
+   "exit": 3536.89,
+   "why": "signal",
+   "r": 1.058
   },
   {
    "key": "60-donchian-eyJuIjoyMCwibSI6MTAsImF0-1795536000000--1",
@@ -3397,7 +3401,11 @@
    "entry": 3560.78,
    "stop": 3624.97,
    "target": null,
-   "status": "open"
+   "status": "closed",
+   "exitTime": "2026-11-25T19:00:00.000Z",
+   "exit": 3535.76,
+   "why": "signal",
+   "r": 0.384
   },
   {
    "key": "30-pullback-eyJsZW4iOjIsImxvIjoxMCwi-1795559400000--1",
@@ -3521,19 +3529,35 @@
    "entry": 3497.84,
    "stop": 3566.29,
    "target": null,
+   "status": "closed",
+   "exitTime": "2026-11-25T20:00:00.000Z",
+   "exit": 3566.29,
+   "why": "stop",
+   "r": -1.006
+  },
+  {
+   "key": "60-pullback-eyJsZW4iOjIsImxvIjoyNSwi-1795629600000--1",
+   "rule_key": "60-pullback-eyJsZW4iOjIsImxvIjoyNSwi",
+   "rule": "1H Trend pullback (RSI)",
+   "side": "SELL",
+   "entryTime": "2026-11-25T18:00:00.000Z",
+   "firstSeen": "2026-11-26T01:57:55.012Z",
+   "entry": 3512.54,
+   "stop": 3596.04,
+   "target": null,
    "status": "open"
   }
  ],
  "summary": {
-  "updated": "2026-11-25T18:42:40.261Z",
-  "signals": 221,
-  "open": 4,
-  "closed": 217,
-  "winRate": 0.6082949308755761,
-  "totalR": 78.934,
-  "returnPct": 21.65,
+  "updated": "2026-11-26T01:57:55.012Z",
+  "signals": 222,
+  "open": 2,
+  "closed": 220,
+  "winRate": 0.6090909090909091,
+  "totalR": 79.37,
+  "returnPct": 21.78,
   "maxDDPct": 3.43,
-  "perDay": 6.34
+  "perDay": 6.33
  },
  "registry": {
   "60-pullback-eyJsZW4iOjIsImxvIjoyNSwi": {
