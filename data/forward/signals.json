@@ -2333,7 +2333,11 @@
    "entry": 4013.62,
    "stop": 4125.37,
    "target": null,
-   "status": "open"
+   "status": "closed",
+   "exitTime": "2026-11-27T06:00:00.000Z",
+   "exit": 3633.4,
+   "why": "signal",
+   "r": 3.399
   },
   {
    "key": "30-pullback-eyJsZW4iOjIsImxvIjoxMCwi-1794339000000--1",
@@ -3598,18 +3602,62 @@
    "exit": 3563.61,
    "why": "signal",
    "r": 0.047
+  },
+  {
+   "key": "60-pullback-eyJsZW4iOjIsImxvIjoyNSwi-1795744800000--1",
+   "rule_key": "60-pullback-eyJsZW4iOjIsImxvIjoyNSwi",
+   "rule": "1H Trend pullback (RSI)",
+   "side": "SELL",
+   "entryTime": "2026-11-27T02:00:00.000Z",
+   "firstSeen": "2026-11-27T11:27:48.530Z",
+   "entry": 3587.18,
+   "stop": 3632.24,
+   "target": null,
+   "status": "closed",
+   "exitTime": "2026-11-27T04:00:00.000Z",
+   "exit": 3632.24,
+   "why": "stop",
+   "r": -1.009
+  },
+  {
+   "key": "60-pullback-eyJsZW4iOjIsImxvIjoyNSwi-1795755600000--1",
+   "rule_key": "60-pullback-eyJsZW4iOjIsImxvIjoyNSwi",
+   "rule": "1H Trend pullback (RSI)",
+   "side": "SELL",
+   "entryTime": "2026-11-27T05:00:00.000Z",
+   "firstSeen": "2026-11-27T11:27:48.530Z",
+   "entry": 3625.94,
+   "stop": 3674.37,
+   "target": null,
+   "status": "open"
+  },
+  {
+   "key": "15-pullback-eyJsZW4iOjIsImxvIjoxMCwi-1795774500000-1",
+   "rule_key": "15-pullback-eyJsZW4iOjIsImxvIjoxMCwi",
+   "rule": "15m Trend pullback (RSI)",
+   "side": "BUY",
+   "entryTime": "2026-11-27T10:15:00.000Z",
+   "firstSeen": "2026-11-27T11:27:48.530Z",
+   "entry": 3658.51,
+   "stop": 3645.89,
+   "target": null,
+   "status": "closed",
+   "exitTime": "2026-11-27T10:45:00.000Z",
+   "exit": 3665.5,
+   "why": "signal",
+   "r": 0.522
   }
  ],
  "summary": {
-  "updated": "2026-11-27T02:45:54.125Z",
-  "signals": 225,
+  "updated": "2026-11-27T11:27:48.530Z",
+  "signals": 228,
   "open": 1,
-  "closed": 224,
-  "winRate": 0.6116071428571429,
-  "totalR": 79.112,
-  "returnPct": 21.71,
+  "closed": 227,
+  "winRate": 0.6123348017621145,
+  "totalR": 82.024,
+  "returnPct": 22.59,
   "maxDDPct": 3.43,
-  "perDay": 6.29
+  "perDay": 6.32
  },
  "registry": {
   "60-pullback-eyJsZW4iOjIsImxvIjoyNSwi": {
